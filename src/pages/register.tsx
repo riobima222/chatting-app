@@ -1,35 +1,74 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { useRouter } from "next/router";
+import { LoginSuccessContext } from "@/context/loginSuccess";
+
+// Sweet Alert
 
 const Register = () => {
-  const [username, setUsername] = useState("");
-  const [email, setEmail] = useState("");
-  const [age, setAge] = useState("");
-  const [gender, setGender] = useState("male");
-  const [password, setPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
+  const [passConfirm, setPassConfirm] = useState<boolean>(false);
+  const [err, setErr] = useState<boolean>(false);
+  const [errorMessage, setErrorMessage] = useState<string>("");
+  const { setLoginSuccess }: any = useContext(LoginSuccessContext);
   const router = useRouter();
 
-  const handleRegister = (e: React.FormEvent<HTMLFormElement>) => {
-    e.preventDefault(); 
-    if (password !== confirmPassword) {
-      alert("Password tidak cocok");
+  const handleRegister = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setPassConfirm(false);
+    setErr(false);
+    setErrorMessage("");
+    const form = e.target as HTMLFormElement;
+    const dataRegister = {
+      username: form.username.value,
+      email: form.email.value,
+      age: form.age.value,
+      gender: form.gender.value,
+      password: form.password.value,
+    };
+    if (form.password.value !== form.confirmPassword.value) {
+      setTimeout(() => {
+        setPassConfirm(true);
+      }, 500);
+      form.confirmPassword.value = "";
       return;
     }
 
-    // Logika register Firebase (nanti akan diintegrasikan)
-    console.log({ username, email, age, gender, password });
+    const res = await fetch("/api/auth/register", {
+      method: "POST",
+      body: JSON.stringify(dataRegister),
+      headers: {
+        "Content-Type": "application/json",
+      },
+    });
+    const response = await res.json();
+    console.log(response);
+    if (response.success === false) {
+      setErr(true);
+      setErrorMessage(response.message);
+      form.email.value = "";
+      form.password.value = "";
+      form.confirmPassword.value = "";
+      return;
+    }
+    setLoginSuccess(true);
+    setTimeout(() => {
+      setLoginSuccess(false);
+    }, 2500);
     router.push("/login");
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen flex items-center justify-center">
+    <div className="flex items-center justify-center min-h-screen">
       <div className="bg-white p-8 rounded-lg shadow-lg max-w-md w-full h-[30em] overflow-auto">
         <h2 className="text-2xl font-bold text-center mb-6 text-gray-800">
           Daftar
         </h2>
-        <form onSubmit={handleRegister} className="space-y-4">
-          <div>
+        <form onSubmit={handleRegister} className="space-y-4 text-black">
+          <div className="flex flex-col">
+            {err && (
+              <span className="ms-3 text-red-400 text-sm tracking-wider text-center">
+                {errorMessage}
+              </span>
+            )}
             <label
               htmlFor="username"
               className="block text-sm font-medium text-gray-700"
@@ -39,7 +78,7 @@ const Register = () => {
             <input
               id="username"
               type="text"
-              value={username}
+              name="username"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
@@ -55,8 +94,8 @@ const Register = () => {
             <input
               id="email"
               type="email"
-              value={email}
               required
+              name="email"
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
           </div>
@@ -71,7 +110,7 @@ const Register = () => {
             <input
               id="age"
               type="number"
-              value={age}
+              name="age"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
@@ -86,7 +125,7 @@ const Register = () => {
             </label>
             <select
               id="gender"
-              value={gender}
+              name="gender"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             >
@@ -105,7 +144,7 @@ const Register = () => {
             <input
               id="password"
               type="password"
-              value={password}
+              name="password"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
@@ -121,10 +160,15 @@ const Register = () => {
             <input
               id="confirmPassword"
               type="password"
-              value={confirmPassword}
+              name="confirmPassword"
               required
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
+            {passConfirm && (
+              <span className="ms-3 text-red-400 text-sm tracking-wider">
+                password not match
+              </span>
+            )}
           </div>
 
           <div>

@@ -1,3 +1,4 @@
+import LoginSuccessProvider from "@/context/loginSuccess";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 
@@ -18,7 +19,9 @@ const geistMono = localFont({
 export default function App({ Component, pageProps }: AppProps) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable}`}>
-      <Component {...pageProps} />
+      <LoginSuccessProvider>
+        <Component {...pageProps} />
+      </LoginSuccessProvider>
     </div>
   );
 }

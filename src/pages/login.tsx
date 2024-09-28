@@ -1,16 +1,32 @@
-import { useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
+import Link from "next/link";
+
+// Sweet Alert
+import Swal from "sweetalert2";
+import { LoginSuccessContext } from "@/context/loginSuccess";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const { loginSuccess }: any = useContext(LoginSuccessContext);
   const router = useRouter();
+
+  useEffect(() => {
+    if (loginSuccess) {
+      Swal.fire({
+        title: "Login Berhasil !",
+        text: "",
+        icon: "success",
+        confirmButtonText: "Close",
+      });
+    }
+  }, [loginSuccess]);
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-    // Logika untuk login Firebase (akan ditambahkan di kemudian)
     console.log({ email, password });
-    router.push("/chat"); // Redirect ke halaman chat setelah login berhasil
+    router.push("/chat");
   };
 
   return (
@@ -65,12 +81,12 @@ const Login = () => {
 
           <p className="text-center text-sm text-gray-600">
             Belum punya akun?{" "}
-            <a
+            <Link
               href="/register"
               className="font-medium text-red-600 hover:text-red-500"
             >
               Daftar di sini
-            </a>
+            </Link>
           </p>
         </form>
       </div>

@@ -10,15 +10,19 @@
   },
   "dependencies": {
     "firebase": "^10.13.2",
+    "jsonwebtoken": "^9.0.2",
     "next": "14.2.12",
+    "nookies": "^2.5.2",
     "react": "^18",
     "react-dom": "^18",
     "react-firebase-hooks": "^5.1.1",
+    "react-icons": "^5.3.0",
     "react-phone-input-2": "^2.15.1",
     "sweetalert2": "^11.14.1",
     "sweetalert2-react-content": "^5.0.7"
   },
   "devDependencies": {
+    "@types/jsonwebtoken": "^9.0.7",
     "@types/node": "^20",
     "@types/react": "^18",
     "@types/react-dom": "^18",

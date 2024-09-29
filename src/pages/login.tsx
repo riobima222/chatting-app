@@ -1,32 +1,57 @@
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
+import { auth } from "@/pages/lib/firebase/config";
+import { setCookie } from "nookies";
 
 // Sweet Alert
 import Swal from "sweetalert2";
 import { LoginSuccessContext } from "@/context/loginSuccess";
+import { signInWithEmailAndPassword } from "firebase/auth";
 
 const Login = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { loginSuccess }: any = useContext(LoginSuccessContext);
+  const [error, setError] = useState(false);
   const router = useRouter();
+
 
   useEffect(() => {
     if (loginSuccess) {
       Swal.fire({
-        title: "Login Berhasil !",
+        title: "Register Berhasil !",
         text: "",
+        timer: 2000,
         icon: "success",
         confirmButtonText: "Close",
       });
     }
   }, [loginSuccess]);
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log({ email, password });
-    router.push("/chat");
+    setError(false);
+
+    try {
+      const userCredential: any = await signInWithEmailAndPassword(
+        auth,
+        email,
+        password
+      );
+      const accessToken = await userCredential.user.getIdToken();
+      setCookie(null, "token", accessToken, {
+        maxAge: 30 * 24 * 60 * 60, // Contoh: cookies akan berlaku selama 30 hari
+        path: "/", // Lokasi cookies
+        secure: true, // Secure cookies hanya berlaku di HTTPS
+        sameSite: "strict", // Proteksi dari CSRF
+      });
+      router.push("/");
+    } catch (err: any) {
+      setTimeout(() => {
+        setError(true);
+      }, 300);
+    }
   };
 
   return (
@@ -69,6 +94,12 @@ const Login = () => {
               className="mt-1 block w-full px-3 py-2 border border-gray-300 rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-red-500 focus:border-red-500 sm:text-sm"
             />
           </div>
+
+          {error && (
+            <div className="text-red-400 text-sm tracking-wider text-center">
+              Email or password is incorrect
+            </div>
+          )}
 
           <div>
             <button

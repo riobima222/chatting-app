@@ -2,7 +2,6 @@ import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
 import { auth } from "@/pages/lib/firebase/config";
-import { setCookie } from "nookies";
 
 // Sweet Alert
 import Swal from "sweetalert2";
@@ -14,8 +13,9 @@ const Login = () => {
   const [password, setPassword] = useState("");
   const { loginSuccess }: any = useContext(LoginSuccessContext);
   const [error, setError] = useState(false);
-  const router = useRouter();
+  const [notAccount, setNotAccount] = useState(false);
 
+  const router = useRouter();
 
   useEffect(() => {
     if (loginSuccess) {
@@ -32,25 +32,25 @@ const Login = () => {
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setError(false);
+    setNotAccount(false);
 
     try {
-      const userCredential: any = await signInWithEmailAndPassword(
+      await signInWithEmailAndPassword(
         auth,
         email,
         password
       );
-      const accessToken = await userCredential.user.getIdToken();
-      setCookie(null, "token", accessToken, {
-        maxAge: 30 * 24 * 60 * 60, // Contoh: cookies akan berlaku selama 30 hari
-        path: "/", // Lokasi cookies
-        secure: true, // Secure cookies hanya berlaku di HTTPS
-        sameSite: "strict", // Proteksi dari CSRF
-      });
       router.push("/");
     } catch (err: any) {
-      setTimeout(() => {
-        setError(true);
-      }, 300);
+      if (err.message == "Firebase: Error (auth/invalid-credential).") {
+        setTimeout(() => {
+          setNotAccount(true);
+        }, 300);
+      } else {
+        setTimeout(() => {
+          setError(true);
+        }, 300);
+      }
     }
   };
 
@@ -98,6 +98,12 @@ const Login = () => {
           {error && (
             <div className="text-red-400 text-sm tracking-wider text-center">
               Email or password is incorrect
+            </div>
+          )}
+
+          {notAccount && (
+            <div className="text-red-400 text-sm tracking-wider text-center">
+              Akun belum di buat
             </div>
           )}
 

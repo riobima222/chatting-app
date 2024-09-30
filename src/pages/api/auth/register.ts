@@ -14,7 +14,7 @@ export default async function handler(
       .json({ success: false, message: "Method not allowed" });
   }
 
-  const { username, email, age, gender, password } = req.body;
+  const { username, email, age, gender, password, photoURL, lastSeen, status, friends } = req.body;
 
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -26,10 +26,14 @@ export default async function handler(
 
     // Simpan informasi tambahan ke Firestore
     await setDoc(doc(db, "users", user.uid), {
-      username: username,
-      email: email,
-      age: age,
-      gender: gender,
+      username,
+      email,
+      age,
+      gender,
+      photoURL,
+      lastSeen,
+      status,
+      friends,
     });
 
     // Perbarui profil dengan username

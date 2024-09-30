@@ -1,4 +1,6 @@
+import ChatAppearProvider from "@/context/chatAppear";
 import LoginSuccessProvider from "@/context/loginSuccess";
+import SearchAppearProvider from "@/context/searchAppear";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 
@@ -20,7 +22,11 @@ export default function App({ Component, pageProps }: AppProps) {
   return (
     <div className={`${geistSans.variable} ${geistMono.variable}`}>
       <LoginSuccessProvider>
-        <Component {...pageProps} />
+        <ChatAppearProvider>
+          <SearchAppearProvider>
+            <Component {...pageProps} />
+          </SearchAppearProvider>
+        </ChatAppearProvider>
       </LoginSuccessProvider>
     </div>
   );

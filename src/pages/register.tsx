@@ -23,6 +23,10 @@ const Register = () => {
       age: form.age.value,
       gender: form.gender.value,
       password: form.password.value,
+      photoURL: "",
+      lastSeen: new Date(),
+      status: "online",
+      friends: []
     };
     if (form.password.value !== form.confirmPassword.value) {
       setTimeout(() => {

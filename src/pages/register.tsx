@@ -1,6 +1,7 @@
 import { useContext, useState } from "react";
 import { useRouter } from "next/router";
 import { LoginSuccessContext } from "@/context/loginSuccess";
+import Link from "next/link";
 
 // Sweet Alert
 
@@ -26,7 +27,7 @@ const Register = () => {
       photoURL: "",
       lastSeen: new Date(),
       status: "online",
-      friends: []
+      friends: [],
     };
     if (form.password.value !== form.confirmPassword.value) {
       setTimeout(() => {
@@ -186,12 +187,12 @@ const Register = () => {
 
           <p className="text-center text-sm text-gray-600">
             Sudah punya akun?{" "}
-            <a
+            <Link
               href="/login"
               className="font-medium text-red-600 hover:text-red-500"
             >
               Masuk di sini
-            </a>
+            </Link>
           </p>
         </form>
       </div>

@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 // ICONS
 import { FaMale, FaFemale } from "react-icons/fa";
 import { AiOutlineUserDelete } from "react-icons/ai";
+import { serverTimestamp } from "firebase/firestore";
 
 interface Friend {
   id: string;
@@ -18,6 +19,9 @@ interface Friend {
 
 const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
+  const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
+  const currentUser = auth.currentUser as any;
+  console.log(currentUser);
 
   // HOOKS
   useEffect(() => {
@@ -32,20 +36,34 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   }, []);
 
   // FUNCTION
-  // Menyaring teman berdasarkan input pencarian
-  const filterUserSearch = usersSearch.filter(
-    (user) => user.email.toLowerCase() !== userNow.email
-  );
-
-  const handleAddFriend = (friend: any) => {
-    // Logika untuk menambahkan teman ke daftar teman obrolan
-    alert(`You have added ${friend.username} as a friend!`);
+  const handleAddFriend = async (friend: any) => {
+    const data = {
+      userId: auth.currentUser?.uid,
+      friendId: friend.id,
+      status: "pending",
+      createdAt: serverTimestamp(),
+    };
+    const res = await fetch("/api/add-friend", {
+      method: "POST",
+      body: JSON.stringify(data),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + currentUser.accessToken,
+      },
+      cache: "no-store",
+    });
+    const response = await res.json();
+    if (response.status) {
+      console.log("berhasil");
+    } else {
+      console.log("ada yang salah dengan aplikasi kamu", response);
+    }
   };
 
   return (
     <div className="flex flex-col w-full h-full overflow-y-auto border-2 border-gray-200 p-4 bg-white">
       {/* Hasil Pencarian */}
-      <ul className="mt-4 space-y-4">
+      <ul className="h-full space-y-4">
         {usersSearch.length > 0 ? (
           usersSearch.map((user) => (
             <li
@@ -99,7 +117,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
             </li>
           ))
         ) : (
-          <li className="flex flex-col items-center justify-center space-y-3 text-gray-600 text-sm py-8">
+          <li className="h-full flex flex-col items-center justify-center space-y-3 text-gray-600 text-sm py-8">
             {/* Ikon User Not Found */}
             <AiOutlineUserDelete className="w-16 h-16 text-gray-400" />
             <p className="font-semibold text-gray-700">No friends found</p>

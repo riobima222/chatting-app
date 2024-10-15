@@ -60,6 +60,7 @@ const ChatPage: React.FC = () => {
       headers: {
         "Content-Type": "application/json",
       },
+      cache: "no-store",
     });
     const response = await res.json();
     if (res.ok) {

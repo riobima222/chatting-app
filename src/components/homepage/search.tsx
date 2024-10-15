@@ -1,11 +1,12 @@
-import { auth } from "@/pages/lib/firebase/config";
+import { auth, db } from "@/pages/lib/firebase/config";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
+import Swal from "sweetalert2";
 
 // ICONS
-import { FaMale, FaFemale } from "react-icons/fa";
-import { AiOutlineUserDelete } from "react-icons/ai";
-import { serverTimestamp } from "firebase/firestore";
+import { collection, onSnapshot, query, serverTimestamp, where } from "firebase/firestore";
+import { FaMale, FaFemale, FaCheckCircle, FaUserPlus } from "react-icons/fa";
+import { AiOutlineUserDelete, AiOutlineClockCircle } from "react-icons/ai";
 
 interface Friend {
   id: string;
@@ -19,9 +20,9 @@ interface Friend {
 
 const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
+  const [friendsStatus, setFriendsStatus] = useState<any>({});
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
   const currentUser = auth.currentUser as any;
-  console.log(currentUser);
 
   // HOOKS
   useEffect(() => {
@@ -34,6 +35,39 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
     });
     return () => unsubcribe();
   }, []);
+
+  useEffect(() => {
+    if (successAddFriend) {
+      Swal.fire({
+        title: "Permintaan Dikirim",
+        text: "",
+        timer: 2500,
+        icon: "question",
+        confirmButtonText: "Close",
+      });
+    }
+  }, [successAddFriend]);
+
+  useEffect(() => {
+    if (currentUser) {
+      try {
+        const q = query(collection(db, "friends"), where("userId", "==", currentUser.uid));
+        onSnapshot(q, (snapshot) => {
+          const results = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }))
+          const statusFriends: { [friendId: string]: string } = {}
+           results.map((doc: any) => {
+             statusFriends[doc.friendId] = doc.status;
+           });
+           setFriendsStatus(statusFriends);
+        })
+      } catch (err) {
+        console.log(err)
+      }
+    }
+  }, [currentUser]);
 
   // FUNCTION
   const handleAddFriend = async (friend: any) => {
@@ -54,9 +88,54 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
     });
     const response = await res.json();
     if (response.status) {
-      console.log("berhasil");
+      setSuccessAddFriend(true);
+      setTimeout(() => {
+        setSuccessAddFriend(false);
+      }, 2500);
     } else {
-      console.log("ada yang salah dengan aplikasi kamu", response);
+      console.log("Ada yang salah dengan aplikasi", response);
+    }
+  };
+
+  const renderFriendStatus = (friend: Friend) => {
+    const status = friendsStatus[friend.id];
+
+    // Jika email hasil pencarian adalah email user yang sedang login, jangan tampilkan tombol
+    if (friend.email === currentUser?.email) {
+      return null;
+    }
+
+    // Status pending
+    if (status === "pending") {
+      return (
+        <div className="flex items-center space-x-2 text-yellow-500">
+          <AiOutlineClockCircle className="w-5 h-5" />
+          <span className="text-sm">Pending</span>
+        </div>
+      );
+    }
+
+    // Status accepted (sudah menjadi teman)
+    else if (status === "accepted") {
+      return (
+        <div className="flex items-center space-x-2 text-green-500">
+          <FaCheckCircle className="w-5 h-5" />
+          <span className="text-sm">Friend</span>
+        </div>
+      );
+    }
+
+    // Tampilkan tombol add friend jika belum pending/accepted
+    else {
+      return (
+        <button
+          onClick={() => handleAddFriend(friend)}
+          className="flex items-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+        >
+          <FaUserPlus className="w-5 h-5 mr-2" />
+          <span>Add Friend</span>
+        </button>
+      );
     }
   };
 
@@ -105,15 +184,8 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
                 </div>
               </div>
 
-              {/* Tombol Add user */}
-              {user.email.toLowerCase() !== userNow.email && (
-                <button
-                  onClick={() => handleAddFriend(user)}
-                  className="bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
-                >
-                  Add Friend
-                </button>
-              )}
+              {/* Tombol Add atau Status Pertemanan */}
+              <div>{renderFriendStatus(user)}</div>
             </li>
           ))
         ) : (

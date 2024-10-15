@@ -1,4 +1,5 @@
-import admin from "@/pages/lib/firebase/firebase-admin";
+import { addFriend } from "@/pages/lib/firebase/services";
+import { apiResponse } from "@/utils/apiResponse";
 import { verifyToken } from "@/utils/verifyToken";
 import { NextApiRequest, NextApiResponse } from "next";
 
@@ -8,11 +9,9 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const data = req.body;
-    console.log(data);
     return verifyToken(req, res, async (decode) => {
-      return res
-        .status(200)
-        .json({ status: true, message: "Semua berjalan dengan lancar" });
+      const response = await addFriend(data);
+      return apiResponse(res, response, "success add friend")
     });
   }
 }

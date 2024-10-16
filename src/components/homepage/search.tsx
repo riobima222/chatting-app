@@ -4,7 +4,13 @@ import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 // ICONS
-import { collection, onSnapshot, query, serverTimestamp, where } from "firebase/firestore";
+import {
+  collection,
+  onSnapshot,
+  query,
+  serverTimestamp,
+  where,
+} from "firebase/firestore";
 import { FaMale, FaFemale, FaCheckCircle, FaUserPlus } from "react-icons/fa";
 import { AiOutlineUserDelete, AiOutlineClockCircle } from "react-icons/ai";
 
@@ -22,7 +28,10 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
   const [friendsStatus, setFriendsStatus] = useState<any>({});
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
+  const [friendRequest, setFriendRequest] = useState<any>();
+  console.log("lihat friend request: ", friendRequest);
   const currentUser = auth.currentUser as any;
+  // console.log("userNow: ", currentUser)
 
   // HOOKS
   useEffect(() => {
@@ -51,20 +60,42 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   useEffect(() => {
     if (currentUser) {
       try {
-        const q = query(collection(db, "friends"), where("userId", "==", currentUser.uid));
+        const q = query(
+          collection(db, "friends"),
+          where("userId", "==", currentUser.uid)
+        );
         onSnapshot(q, (snapshot) => {
           const results = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
-          }))
-          const statusFriends: { [friendId: string]: string } = {}
-           results.map((doc: any) => {
-             statusFriends[doc.friendId] = doc.status;
-           });
-           setFriendsStatus(statusFriends);
-        })
+          }));
+          const statusFriends: { [friendId: string]: string } = {};
+          results.map((doc: any) => {
+            statusFriends[doc.friendId] = doc.status;
+          });
+          setFriendsStatus(statusFriends);
+        });
       } catch (err) {
-        console.log(err)
+        console.log(err);
+      }
+
+      try {
+        const q = query(
+          collection(db, "friends"),
+          where("friendId", "==", currentUser.uid)
+        );
+        onSnapshot(q, (snapshot) => {
+          const results = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          const requestPending = results.filter(
+            (doc: any) => doc.status === "pending"
+          );
+          setFriendRequest(requestPending);
+        });
+      } catch (err) {
+        console.log(err);
       }
     }
   }, [currentUser]);
@@ -75,7 +106,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
       userId: auth.currentUser?.uid,
       friendId: friend.id,
       status: "pending",
-      createdAt: serverTimestamp(),
+      createdAt: new Date(),
     };
     const res = await fetch("/api/add-friend", {
       method: "POST",

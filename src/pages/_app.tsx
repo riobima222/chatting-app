@@ -1,5 +1,6 @@
 import ChatAppearProvider from "@/context/chatAppear";
 import LoginSuccessProvider from "@/context/loginSuccess";
+import NotificationProvider from "@/context/notificationAppear";
 import SearchAppearProvider from "@/context/searchAppear";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
@@ -24,7 +25,9 @@ export default function App({ Component, pageProps }: AppProps) {
       <LoginSuccessProvider>
         <ChatAppearProvider>
           <SearchAppearProvider>
-            <Component {...pageProps} />
+            <NotificationProvider>
+              <Component {...pageProps} />
+            </NotificationProvider>
           </SearchAppearProvider>
         </ChatAppearProvider>
       </LoginSuccessProvider>

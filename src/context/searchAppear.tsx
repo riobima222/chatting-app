@@ -3,7 +3,7 @@ import React, { createContext, useState } from "react";
 export const SearchAppearContext = createContext({});
 
 const SearchAppearProvider = ({ children }: { children: React.ReactNode }) => {
-  const [ searchAppear, setSearchAppear] = useState(true);
+  const [searchAppear, setSearchAppear] = useState(false);
 
   return (
     <SearchAppearContext.Provider value={{ searchAppear, setSearchAppear }}>

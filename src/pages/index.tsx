@@ -2,13 +2,17 @@ import React, { FormEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { AiOutlineMenu } from "react-icons/ai";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth } from "@/pages/lib/firebase/config";
+import { auth, db } from "@/pages/lib/firebase/config";
 import Loading from "@/components/loading";
 import { signOut } from "firebase/auth";
 import Chat from "@/components/homepage/chat";
 import { ChatAppearContext } from "@/context/chatAppear";
 import { SearchAppearContext } from "@/context/searchAppear";
 import Search from "@/components/homepage/search";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
+import Notification from "@/components/homepage/notification";
+import NotificationIcon from "@/components/navbar/notificationIcon";
+import { NotificationAppearContext } from "@/context/notificationAppear";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
@@ -23,11 +27,39 @@ const ChatPage: React.FC = () => {
   ]);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
+  const [friendRequest, setFriendRequest] = useState<any>();
+  console.log("lihat friend request: ", friendRequest);
+  const currentUser = auth.currentUser as any;
 
   // GET CONTEXT
   const { chatAppear, setChatAppear }: any = useContext(ChatAppearContext);
   const { searchAppear, setSearchAppear }: any =
     useContext(SearchAppearContext);
+  const {notificationAppear, setNotificationAppear} : any = useContext(NotificationAppearContext);
+
+  // HOOKS :
+  useEffect(() => {
+    if (currentUser) {
+      try {
+        const q = query(
+          collection(db, "friends"),
+          where("friendId", "==", currentUser.uid)
+        );
+        onSnapshot(q, (snapshot) => {
+          const results = snapshot.docs.map((doc) => ({
+            id: doc.id,
+            ...doc.data(),
+          }));
+          const requestPending = results.filter(
+            (doc: any) => doc.status === "pending"
+          );
+          setFriendRequest(requestPending);
+        });
+      } catch (err) {
+        console.log(err);
+      }
+    }
+  }, [currentUser]);
 
   useEffect(() => {
     const unsubcribe = onAuthStateChanged(auth, (user) => {
@@ -53,6 +85,9 @@ const ChatPage: React.FC = () => {
 
   const handleSearchFriend = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    setChatAppear(false);
+    setNotificationAppear(false);
+    setSearchAppear(true);
     const form = e.target as HTMLFormElement;
     const res = await fetch("/api/search", {
       method: "POST",
@@ -75,11 +110,18 @@ const ChatPage: React.FC = () => {
   const handleSelectFriend = (friendName: string) => {
     setSelectedFriend(friendName);
     setIsSidebarOpen(false); // Close sidebar on mobile after selecting a friend
+    setChatAppear(true);
+    setNotificationAppear(false);
+    setSearchAppear(false);
   };
 
   const toggleSidebar = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
+
+  const handleAcceptRequest = async () => {};
+
+  const handleDeclineRequest = async () => {};
 
   if (isAuthenticating) {
     return <Loading />;
@@ -172,16 +214,26 @@ const ChatPage: React.FC = () => {
         {/* Area Chat */}
         <div className="flex flex-col w-full md:w-3/4 h-full">
           {/* Header Chat */}
-          <div className="hidden md:flex items-center justify-between bg-red-600 p-4">
+          <div className="hidden md:flex items-center justify-between bg-red-600 px-4 py-1">
             <div className="flex w-full items-center justify-between">
-              <div>Logo</div>
+              <div className="flex flex-col justify-center items-center">
+                <Image
+                  src={"/images/chatting-app-logo.png"}
+                  alt="logo-image"
+                  width={35}
+                  height={35}
+                  className="h-[2em] w-[2em]"
+                />
+                <span className="text-white">erchat</span>
+              </div>
               <div className="flex items-center">
+                <NotificationIcon />
                 <Image
                   src="/images/profile.png" // Ganti dengan avatar pengguna
                   alt="Avatar"
                   width={35}
                   height={35}
-                  className="rounded-full h-[2em] w-[2em]"
+                  className="rounded-full h-[2em] w-[2em] ml-4"
                 />
 
                 {/* Tambahan Tombol Logout di Header Desktop */}
@@ -197,6 +249,13 @@ const ChatPage: React.FC = () => {
 
           {chatAppear && <Chat />}
           {searchAppear && <Search usersSearch={usersSearch} />}
+          {notificationAppear && (
+            <Notification
+              friendRequests={friendRequest}
+              handleAccept={handleAcceptRequest}
+              handleDecline={handleDeclineRequest}
+            />
+          )}
         </div>
       </div>
     </div>

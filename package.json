@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+    "date-fns": "^4.1.0",
     "firebase": "^10.13.2",
     "firebase-admin": "^12.6.0",
     "jsonwebtoken": "^9.0.2",

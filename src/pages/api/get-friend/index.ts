@@ -6,7 +6,7 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { email } = req.body;
-  const response = await getFriend(email);
+  const { friendId } = req.body;
+  const response = await getFriend(friendId);
   return apiResponse(res, response, "berhasil mencari friend", response);
 }

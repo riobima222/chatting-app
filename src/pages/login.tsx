@@ -1,7 +1,7 @@
 import { useContext, useEffect, useState } from "react";
 import { useRouter } from "next/router";
 import Link from "next/link";
-import { auth } from "@/pages/lib/firebase/config";
+import { auth } from "@/lib/firebase/config";
 
 // Sweet Alert
 import Swal from "sweetalert2";
@@ -35,11 +35,7 @@ const Login = () => {
     setNotAccount(false);
 
     try {
-      await signInWithEmailAndPassword(
-        auth,
-        email,
-        password
-      );
+      await signInWithEmailAndPassword(auth, email, password);
       router.push("/");
     } catch (err: any) {
       if (err.message == "Firebase: Error (auth/invalid-credential).") {

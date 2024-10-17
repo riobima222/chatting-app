@@ -1,6 +1,6 @@
 // src/pages/api/register.ts
 import type { NextApiRequest, NextApiResponse } from "next";
-import { auth, db } from "@/pages/lib/firebase/config";
+import { auth, db } from "@/lib/firebase/config";
 import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { doc, setDoc } from "firebase/firestore";
 
@@ -14,7 +14,17 @@ export default async function handler(
       .json({ success: false, message: "Method not allowed" });
   }
 
-  const { username, email, age, gender, password, photoURL, lastSeen, status, friends } = req.body;
+  const {
+    username,
+    email,
+    age,
+    gender,
+    password,
+    photoURL,
+    lastSeen,
+    status,
+    friends,
+  } = req.body;
 
   try {
     const userCredential = await createUserWithEmailAndPassword(
@@ -50,12 +60,10 @@ export default async function handler(
       error.message ===
       "Firebase: Password should be at least 6 characters (auth/weak-password)."
     ) {
-      return res
-        .status(500)
-        .json({
-          success: false,
-          message: "password tidak kuat, buatkan dengan kombinasi angka",
-        });
+      return res.status(500).json({
+        success: false,
+        message: "password tidak kuat, buatkan dengan kombinasi angka",
+      });
     } else {
       return res
         .status(500)

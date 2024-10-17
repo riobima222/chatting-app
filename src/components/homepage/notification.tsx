@@ -1,28 +1,50 @@
 import { FaCheck, FaTimes } from "react-icons/fa";
 import { AiOutlineUserDelete } from "react-icons/ai";
+import { calculateTimeDifference } from "@/utils/calculateDayBetween";
+import Image from "next/image";
+import { useContext, useEffect } from "react";
+import { LoginSuccessContext } from "@/context/loginSuccess";
+import Swal from "sweetalert2";
 
 const Notification = ({ friendRequests, handleAccept, handleDecline }: any) => {
-  
+  console.log("Ndelok: ", friendRequests);
+  const { loginSuccess }: any = useContext(LoginSuccessContext);
+  useEffect(() => {
+    if (loginSuccess) {
+      Swal.fire({
+        title: "Teman di tambahkan !",
+        text: "sekarang kamu bisa chatting dengan teman kamu ini",
+        timer: 3400,
+        icon: "success",
+        confirmButtonText: "Close",
+      });
+    }
+  }, [loginSuccess]);
   return (
-    <div
-      className="flex flex-col w-full h-full overflow-y-auto border-2 border-gray-200 p-4 bg-white"
-    >
+    <div className="flex flex-col w-full h-full overflow-y-auto border-2 border-gray-200 p-4 bg-white">
       {/* Daftar Notifikasi Permintaan Pertemanan */}
       <ul className="h-full space-y-4">
         {friendRequests && friendRequests.length > 0 ? (
           friendRequests.map((request: any) => (
             <li
-              key={request.id}
+              key={request.email}
               className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-md"
             >
               <div className="flex items-center space-x-3">
+                <Image
+                  src="/images/profile.png" // Ganti dengan avatar pengguna
+                  alt="Avatar"
+                  width={35}
+                  height={35}
+                  className="rounded-full h-[2em] w-[2em]"
+                />
                 {/* Info Permintaan Pertemanan */}
                 <div>
                   <p className="font-semibold text-gray-800">
-                    Friend request from {request.userId}
+                    {`${request.user.username} (meminta pertemanan)`}
                   </p>
                   <p className="text-sm text-gray-600">
-                    {new Date(request.createdAt).toLocaleString()}
+                    {calculateTimeDifference(request.createdAt)}
                   </p>
                 </div>
               </div>

@@ -2,7 +2,7 @@ import React, { FormEvent, useContext, useEffect, useState } from "react";
 import Image from "next/image";
 import { AiOutlineMenu } from "react-icons/ai";
 import { onAuthStateChanged, User } from "firebase/auth";
-import { auth, db } from "@/pages/lib/firebase/config";
+import { auth, db } from "@/lib/firebase/config";
 import Loading from "@/components/loading";
 import { signOut } from "firebase/auth";
 import Chat from "@/components/homepage/chat";
@@ -13,6 +13,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import Notification from "@/components/homepage/notification";
 import NotificationIcon from "@/components/navbar/notificationIcon";
 import { NotificationAppearContext } from "@/context/notificationAppear";
+import { LoginSuccessContext } from "@/context/loginSuccess";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
@@ -21,21 +22,20 @@ const ChatPage: React.FC = () => {
   const [searchEmail, setSearchEmail] = useState("");
   const [friendFound, setFriendFound] = useState(false);
   const [friendName, setFriendName] = useState("");
-  const [friendsList, setFriendsList] = useState([
-    { name: "Ratna_aulia313", email: "friend@example.com" },
-    { name: "rioBima354", email: "otherfriend@example.com" },
-  ]);
+  const [friendsList, setFriendsList] = useState<any>([]);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [friendRequest, setFriendRequest] = useState<any>();
-  console.log("lihat friend request: ", friendRequest);
   const currentUser = auth.currentUser as any;
 
   // GET CONTEXT
   const { chatAppear, setChatAppear }: any = useContext(ChatAppearContext);
   const { searchAppear, setSearchAppear }: any =
     useContext(SearchAppearContext);
-  const {notificationAppear, setNotificationAppear} : any = useContext(NotificationAppearContext);
+  const { notificationAppear, setNotificationAppear }: any = useContext(
+    NotificationAppearContext
+  );
+  const { loginSuccess, setLoginSuccess }: any = useContext(LoginSuccessContext);
 
   // HOOKS :
   useEffect(() => {
@@ -53,7 +53,35 @@ const ChatPage: React.FC = () => {
           const requestPending = results.filter(
             (doc: any) => doc.status === "pending"
           );
-          setFriendRequest(requestPending);
+          const friendIds = requestPending.map((doc: any) => doc.userId);
+          const retriveFriends = async () => {
+            await fetch("/api/get-request-friend", {
+              method: "POST",
+              body: JSON.stringify({ friendIds }),
+              headers: {
+                "Content-Type": "application/json",
+              },
+              cache: "no-store",
+            })
+              .then((res) => res.json())
+              .then((data) => {
+                const userOfFriendRequests: any[] = [];
+                data.data.forEach((user: any) => {
+                  userOfFriendRequests.push({
+                    username: user.username,
+                    email: user.email,
+                  });
+                });
+                const combined = requestPending.map((request, index) => {
+                  return {
+                    ...request,
+                    user: userOfFriendRequests[index],
+                  };
+                });
+                setFriendRequest(combined);
+              });
+          };
+          retriveFriends();
         });
       } catch (err) {
         console.log(err);
@@ -119,7 +147,24 @@ const ChatPage: React.FC = () => {
     setIsSidebarOpen(!isSidebarOpen);
   };
 
-  const handleAcceptRequest = async () => {};
+  const handleAcceptRequest = async (friendId: string) => {
+    await fetch("/api/friends/accept", {
+      method: "POST",
+      body: JSON.stringify({ friendId }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + currentUser.accessToken,
+      },
+      cache: "no-store",
+    })
+      .then((res) => res.json())
+      .then((response) => {
+        setLoginSuccess(true);
+        setTimeout(() => {
+          setLoginSuccess(false);
+        }, 3500)
+      });
+  };
 
   const handleDeclineRequest = async () => {};
 
@@ -188,15 +233,15 @@ const ChatPage: React.FC = () => {
           </div>
 
           <ul className="space-y-2">
-            {friendsList.map((friend) => (
+            {friendsList.map((friend: any, key: number) => (
               <li
-                key={friend.email}
+                key={key}
                 className={`flex items-center gap-3 p-2 text-sm rounded-lg cursor-pointer hover:bg-red-200 transition-colors ${
-                  selectedFriend === friend.name
+                  selectedFriend === friend.username
                     ? "bg-red-500 text-white"
                     : "bg-white text-gray-700"
                 }`}
-                onClick={() => handleSelectFriend(friend.name)}
+                onClick={() => handleSelectFriend(friend.username)}
               >
                 <Image
                   src="/images/profile.png" // Ganti dengan avatar pengguna
@@ -205,7 +250,7 @@ const ChatPage: React.FC = () => {
                   height={35}
                   className="rounded-full h-[1.4em] w-[1.4em]"
                 />
-                <span>{friend.name}</span>
+                <span>{friend.username}</span>
               </li>
             ))}
           </ul>

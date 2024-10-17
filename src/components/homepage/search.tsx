@@ -1,16 +1,10 @@
-import { auth, db } from "@/pages/lib/firebase/config";
+import { auth, db } from "@/lib/firebase/config";
 import { User, onAuthStateChanged } from "firebase/auth";
 import { useEffect, useState } from "react";
 import Swal from "sweetalert2";
 
 // ICONS
-import {
-  collection,
-  onSnapshot,
-  query,
-  serverTimestamp,
-  where,
-} from "firebase/firestore";
+import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { FaMale, FaFemale, FaCheckCircle, FaUserPlus } from "react-icons/fa";
 import { AiOutlineUserDelete, AiOutlineClockCircle } from "react-icons/ai";
 
@@ -106,7 +100,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
       userId: auth.currentUser?.uid,
       friendId: friend.id,
       status: "pending",
-      createdAt: new Date(),
+      createdAt: new Date().toISOString(),
     };
     const res = await fetch("/api/add-friend", {
       method: "POST",

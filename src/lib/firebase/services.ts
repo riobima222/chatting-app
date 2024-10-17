@@ -1,10 +1,13 @@
-import { db } from "@/pages/lib/firebase/config";
+import { db } from "@/lib/firebase/config";
 import {
   addDoc,
   collection,
+  doc,
+  getDoc,
   getDocs,
   onSnapshot,
   query,
+  updateDoc,
   where,
 } from "firebase/firestore";
 import { FriendInter } from "./interface";
@@ -48,6 +51,32 @@ export const getFriendsShip = async (userId: string) => {
       }));
       return results;
     });
+  } catch (err) {
+    return false;
+  }
+};
+
+// GET REQUEST FRIENDS
+export const getRequestFriends = async (friendIds: string[]) => {
+  try {
+    const results: any[] = [];
+    for (const id of friendIds) {
+      const snapshot = await getDoc(doc(collection(db, "users"), id)); // Ambil dokumen berdasarkan ID
+      results.push({ ...snapshot.data() });
+    }
+    return results;
+  } catch (err) {
+    return false;
+  }
+};
+
+// ACCEPT FRIEND REQUEST
+export const acceptFriend = async (friendId: string) => {
+  try {
+    await updateDoc(doc(db, "friends", friendId), {
+      status: "accepted",
+    });
+    return true;
   } catch (err) {
     return false;
   }

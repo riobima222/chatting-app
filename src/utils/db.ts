@@ -1,4 +1,4 @@
-import { db } from "@/pages/lib/firebase/config";
+import { db } from "@/lib/firebase/config";
 import {
   collection,
   query,

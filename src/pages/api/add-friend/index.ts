@@ -1,4 +1,4 @@
-import { addFriend } from "@/pages/lib/firebase/services";
+import { addFriend } from "@/lib/firebase/services";
 import { apiResponse } from "@/utils/apiResponse";
 import { verifyToken } from "@/utils/verifyToken";
 import { NextApiRequest, NextApiResponse } from "next";
@@ -11,7 +11,7 @@ export default async function handler(
     const data = req.body;
     return verifyToken(req, res, async (decode) => {
       const response = await addFriend(data);
-      return apiResponse(res, response, "success add friend")
+      return apiResponse(res, response, "success add friend");
     });
   }
 }

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import { auth } from "@/pages/lib/firebase/config";
+import { auth } from "@/lib/firebase/config";
 import { useAuthState } from "react-firebase-hooks/auth";
 import { getContacts, getOrCreateChat } from "../utils/db";
 

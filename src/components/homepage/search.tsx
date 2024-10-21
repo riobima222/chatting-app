@@ -20,12 +20,10 @@ interface Friend {
 
 const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
-  const [friendsStatus, setFriendsStatus] = useState<any>({});
+  const [friendStatus, setFriendStatus] = useState<any>([]);
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
-  const [friendRequest, setFriendRequest] = useState<any>();
-  console.log("lihat friend request: ", friendRequest);
   const currentUser = auth.currentUser as any;
-  // console.log("userNow: ", currentUser)
+  console.log("lihat : ", currentUser)
 
   // HOOKS
   useEffect(() => {
@@ -52,53 +50,41 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   }, [successAddFriend]);
 
   useEffect(() => {
-    if (currentUser) {
+    if (currentUser && usersSearch.length > 0) {
       try {
-        const q = query(
+        const q1 = query(
           collection(db, "friends"),
-          where("userId", "==", currentUser.uid)
+          where("user2", "==", currentUser.uid),
+          where("user1", "==", usersSearch[0].id)
         );
-        onSnapshot(q, (snapshot) => {
-          const results = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          const statusFriends: { [friendId: string]: string } = {};
-          results.map((doc: any) => {
-            statusFriends[doc.friendId] = doc.status;
-          });
-          setFriendsStatus(statusFriends);
-        });
-      } catch (err) {
-        console.log(err);
-      }
 
-      try {
-        const q = query(
+        const q2 = query(
           collection(db, "friends"),
-          where("friendId", "==", currentUser.uid)
+          where("user1", "==", currentUser.uid),
+          where("user2", "==", usersSearch[0].id)
         );
-        onSnapshot(q, (snapshot) => {
-          const results = snapshot.docs.map((doc) => ({
-            id: doc.id,
-            ...doc.data(),
-          }));
-          const requestPending = results.filter(
-            (doc: any) => doc.status === "pending"
-          );
-          setFriendRequest(requestPending);
+
+        onSnapshot(q1, (snapshot1) => {
+          onSnapshot(q2, (snapshot2) => {
+            const results = [...snapshot1.docs, ...snapshot2.docs];
+            const dataResults = results.map((doc) => ({
+              id: doc.id,
+              ...doc.data(),
+            }));
+            setFriendStatus(dataResults[0]);
+          });
         });
       } catch (err) {
         console.log(err);
       }
     }
-  }, [currentUser]);
+  }, [currentUser, usersSearch]);
 
   // FUNCTION
   const handleAddFriend = async (friend: any) => {
     const data = {
-      userId: auth.currentUser?.uid,
-      friendId: friend.id,
+      user1: auth.currentUser?.uid,
+      user2: friend.id,
       status: "pending",
       createdAt: new Date().toISOString(),
     };
@@ -123,10 +109,10 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   };
 
   const renderFriendStatus = (friend: Friend) => {
-    const status = friendsStatus[friend.id];
+    const status = friend?.status;
 
     // Jika email hasil pencarian adalah email user yang sedang login, jangan tampilkan tombol
-    if (friend.email === currentUser?.email) {
+    if (usersSearch[0].email === currentUser?.email) {
       return null;
     }
 
@@ -154,7 +140,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
     else {
       return (
         <button
-          onClick={() => handleAddFriend(friend)}
+          onClick={() => handleAddFriend(usersSearch[0])}
           className="flex items-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
         >
           <FaUserPlus className="w-5 h-5 mr-2" />
@@ -210,7 +196,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
               </div>
 
               {/* Tombol Add atau Status Pertemanan */}
-              <div>{renderFriendStatus(user)}</div>
+              <div>{renderFriendStatus(friendStatus)}</div>
             </li>
           ))
         ) : (

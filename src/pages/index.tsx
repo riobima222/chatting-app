@@ -27,6 +27,7 @@ const ChatPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [friendRequest, setFriendRequest] = useState<any>();
   const currentUser = auth.currentUser as any;
+  console.log("ini adalah current user: ");
 
   // GET CONTEXT
   const { chatAppear, setChatAppear }: any = useContext(ChatAppearContext);
@@ -35,7 +36,8 @@ const ChatPage: React.FC = () => {
   const { notificationAppear, setNotificationAppear }: any = useContext(
     NotificationAppearContext
   );
-  const { loginSuccess, setLoginSuccess }: any = useContext(LoginSuccessContext);
+  const { loginSuccess, setLoginSuccess }: any =
+    useContext(LoginSuccessContext);
 
   // HOOKS :
   useEffect(() => {
@@ -116,6 +118,7 @@ const ChatPage: React.FC = () => {
     setChatAppear(false);
     setNotificationAppear(false);
     setSearchAppear(true);
+    console.log("masuk kesini");
     const form = e.target as HTMLFormElement;
     const res = await fetch("/api/search", {
       method: "POST",
@@ -126,10 +129,12 @@ const ChatPage: React.FC = () => {
       cache: "no-store",
     });
     const response = await res.json();
+    console.log("lihat response: ", response);
     if (res.ok) {
       setUserSearch(response.data);
       if (response.data.length === 0) form.email.value = "";
     } else {
+      console.log("gagal mengambil data");
       form.email.value = "";
       console.log(response);
     }
@@ -162,7 +167,7 @@ const ChatPage: React.FC = () => {
         setLoginSuccess(true);
         setTimeout(() => {
           setLoginSuccess(false);
-        }, 3500)
+        }, 3500);
       });
   };
 
@@ -273,13 +278,16 @@ const ChatPage: React.FC = () => {
               </div>
               <div className="flex items-center">
                 <NotificationIcon />
-                <Image
-                  src="/images/profile.png" // Ganti dengan avatar pengguna
-                  alt="Avatar"
-                  width={35}
-                  height={35}
-                  className="rounded-full h-[2em] w-[2em] ml-4"
-                />
+                <div className="flex flex-col justufy-center ml-4 items-center">
+                  <Image
+                    src="/images/profile.png" // Ganti dengan avatar pengguna
+                    alt="Avatar"
+                    width={35}
+                    height={35}
+                    className="rounded-full h-[2em] w-[2em]"
+                  />
+                  <span className="text-white">{currentUser.displayName}</span>
+                </div>
 
                 {/* Tambahan Tombol Logout di Header Desktop */}
                 <button

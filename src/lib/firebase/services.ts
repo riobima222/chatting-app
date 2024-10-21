@@ -16,14 +16,12 @@ import { FriendInter } from "./interface";
 
 export const getFriend = async (email: string) => {
   try {
-    const usersRef = collection(db, "users");
-    const q = query(usersRef, where("email", "==", email));
-
+    const q = query(collection(db, "users"), where("email", "==", email));
     const snapshot = await getDocs(q);
-    const results: any[] = [];
-    snapshot.forEach((doc) => {
-      results.push({ id: doc.id, ...doc.data() });
-    });
+    const results: any = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
     return results;
   } catch (err) {
     return false;

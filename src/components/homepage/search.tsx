@@ -23,7 +23,6 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
   const [friendStatus, setFriendStatus] = useState<any>([]);
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
   const currentUser = auth.currentUser as any;
-  console.log("lihat : ", currentUser)
 
   // HOOKS
   useEffect(() => {

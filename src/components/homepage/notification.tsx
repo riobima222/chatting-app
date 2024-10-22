@@ -7,7 +7,6 @@ import { LoginSuccessContext } from "@/context/loginSuccess";
 import Swal from "sweetalert2";
 
 const Notification = ({ friendRequests, handleAccept, handleDecline }: any) => {
-  console.log("Ndelok: ", friendRequests);
   const { loginSuccess }: any = useContext(LoginSuccessContext);
   useEffect(() => {
     if (loginSuccess) {
@@ -25,9 +24,9 @@ const Notification = ({ friendRequests, handleAccept, handleDecline }: any) => {
       {/* Daftar Notifikasi Permintaan Pertemanan */}
       <ul className="h-full space-y-4">
         {friendRequests && friendRequests.length > 0 ? (
-          friendRequests.map((request: any) => (
+          friendRequests.map((request: any, index: number) => (
             <li
-              key={request.email}
+              key={index}
               className="flex justify-between items-center p-4 bg-gray-100 rounded-lg shadow-md"
             >
               <div className="flex items-center space-x-3">

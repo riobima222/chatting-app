@@ -43,9 +43,9 @@ const Chat = () => {
     <div className="flex flex-col w-full h-full overflow-y-auto">
       {/* Area Pesan */}
       <div className="flex-grow p-4 overflow-y-auto bg-gray-50">
-        {messages.map((message) => (
+        {messages.map((message: any, index: number) => (
           <div
-            key={message.id}
+            key={index}
             className={`flex ${
               message.sender === "User1" ? "justify-end" : "justify-start"
             } mb-2`}

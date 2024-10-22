@@ -14,20 +14,18 @@ import Notification from "@/components/homepage/notification";
 import NotificationIcon from "@/components/navbar/notificationIcon";
 import { NotificationAppearContext } from "@/context/notificationAppear";
 import { LoginSuccessContext } from "@/context/loginSuccess";
+import { retriveFriendsList } from "@/utils/homepage/retriveFriendsList";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
   const [isAuthenticating, setIsAuthenticating] = useState(true);
   const [usersSearch, setUserSearch] = useState([]);
   const [searchEmail, setSearchEmail] = useState("");
-  const [friendFound, setFriendFound] = useState(false);
-  const [friendName, setFriendName] = useState("");
   const [friendsList, setFriendsList] = useState<any>([]);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
-  const [friendRequest, setFriendRequest] = useState<any>();
+  const [friendRequest, setFriendRequest] = useState<any>([]);
   const currentUser = auth.currentUser as any;
-  console.log("ini adalah current user: ");
 
   // GET CONTEXT
   const { chatAppear, setChatAppear }: any = useContext(ChatAppearContext);
@@ -45,7 +43,7 @@ const ChatPage: React.FC = () => {
       try {
         const q = query(
           collection(db, "friends"),
-          where("friendId", "==", currentUser.uid)
+          where("user2", "==", currentUser.uid)
         );
         onSnapshot(q, (snapshot) => {
           const results = snapshot.docs.map((doc) => ({
@@ -55,7 +53,7 @@ const ChatPage: React.FC = () => {
           const requestPending = results.filter(
             (doc: any) => doc.status === "pending"
           );
-          const friendIds = requestPending.map((doc: any) => doc.userId);
+          const friendIds = requestPending.map((doc: any) => doc.user1);
           const retriveFriends = async () => {
             await fetch("/api/get-request-friend", {
               method: "POST",
@@ -88,6 +86,15 @@ const ChatPage: React.FC = () => {
       } catch (err) {
         console.log(err);
       }
+      
+      // AMBIL FRIENDS LIST
+      try {
+        retriveFriendsList(currentUser.uid, (data: any) => {
+          setFriendsList(data);
+        })
+      } catch (err) {
+
+      }
     }
   }, [currentUser]);
 
@@ -118,7 +125,6 @@ const ChatPage: React.FC = () => {
     setChatAppear(false);
     setNotificationAppear(false);
     setSearchAppear(true);
-    console.log("masuk kesini");
     const form = e.target as HTMLFormElement;
     const res = await fetch("/api/search", {
       method: "POST",
@@ -129,12 +135,10 @@ const ChatPage: React.FC = () => {
       cache: "no-store",
     });
     const response = await res.json();
-    console.log("lihat response: ", response);
     if (res.ok) {
       setUserSearch(response.data);
       if (response.data.length === 0) form.email.value = "";
     } else {
-      console.log("gagal mengambil data");
       form.email.value = "";
       console.log(response);
     }
@@ -277,7 +281,7 @@ const ChatPage: React.FC = () => {
                 <span className="text-white">erchat</span>
               </div>
               <div className="flex items-center">
-                <NotificationIcon />
+                <NotificationIcon notificationCount={friendRequest.length} />
                 <div className="flex flex-col justufy-center ml-4 items-center">
                   <Image
                     src="/images/profile.png" // Ganti dengan avatar pengguna

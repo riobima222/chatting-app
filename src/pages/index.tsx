@@ -25,6 +25,7 @@ const ChatPage: React.FC = () => {
   const [selectedFriend, setSelectedFriend] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [friendRequest, setFriendRequest] = useState<any>([]);
+  const [friendId, setFriendId] = useState<string>("")
   const currentUser = auth.currentUser as any;
 
   // GET CONTEXT
@@ -144,8 +145,9 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleSelectFriend = (friendName: string) => {
-    setSelectedFriend(friendName);
+  const handleSelectFriend = (friend: any) => {
+    setFriendId(friend.id)
+    setSelectedFriend(friend.username);
     setIsSidebarOpen(false); // Close sidebar on mobile after selecting a friend
     setChatAppear(true);
     setNotificationAppear(false);
@@ -250,7 +252,7 @@ const ChatPage: React.FC = () => {
                     ? "bg-red-500 text-white"
                     : "bg-white text-gray-700"
                 }`}
-                onClick={() => handleSelectFriend(friend.username)}
+                onClick={() => handleSelectFriend(friend)}
               >
                 <Image
                   src="/images/profile.png" // Ganti dengan avatar pengguna
@@ -304,7 +306,7 @@ const ChatPage: React.FC = () => {
             </div>
           </div>
 
-          {chatAppear && <Chat />}
+          {chatAppear && <Chat userId={currentUser.uid} friendId={friendId}/>}
           {searchAppear && <Search usersSearch={usersSearch} />}
           {notificationAppear && (
             <Notification

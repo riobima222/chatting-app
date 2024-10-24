@@ -6,7 +6,9 @@ import {
   getDoc,
   getDocs,
   onSnapshot,
+  orderBy,
   query,
+  setDoc,
   updateDoc,
   where,
 } from "firebase/firestore";
@@ -60,7 +62,7 @@ export const getRequestFriends = async (friendIds: string[]) => {
     const results: any[] = [];
     for (const id of friendIds) {
       const snapshot = await getDoc(doc(collection(db, "users"), id)); // Ambil dokumen berdasarkan ID
-      results.push({ ...snapshot.data() });
+      results.push({ id: snapshot.id, ...snapshot.data() });
     }
     return results;
   } catch (err) {
@@ -74,6 +76,46 @@ export const acceptFriend = async (friendId: string) => {
     await updateDoc(doc(db, "friends", friendId), {
       status: "accepted",
     });
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+// CHATS
+export const cekChatRoom = async (
+  roomId: string,
+  id: { user1: string; user2: string }
+) => {
+  const chatRoomRef = doc(db, "chats", roomId);
+  const snapshot = await getDoc(chatRoomRef);
+  if (!snapshot.exists()) {
+    await setDoc(chatRoomRef, {
+      users: [id.user1, id.user2],
+      createdAt: new Date(),
+    });
+  }
+};
+
+export const ambilChats = async (roomId: string, callback: any) => {
+  const messagesRef = collection(db, "chats", roomId, "messages");
+  const q = query(messagesRef, orderBy("createdAt", "asc"));
+  onSnapshot(q, (snapshot) => {
+    const messages = snapshot.docs.map((doc) => ({
+      id: doc.id,
+      ...doc.data(),
+    }));
+    callback(messages);
+  });
+};
+
+export const sendMessage = async (data: {
+  message: { senderId: string; text: string; createdAt: Date };
+  roomId: string;
+}) => {
+  try {
+    const messageRef = collection(db, "chats", data.roomId, "messages");
+    await addDoc(messageRef, data.message);
     return true;
   } catch (err) {
     return false;

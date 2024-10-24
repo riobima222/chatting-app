@@ -24,11 +24,11 @@ export function calculateTimeDifference(dateString: string): string {
 
   // Menyusun hasil
   if (days > 0) {
-    return `${days} hari yang lalu`;
+    return `${days} hari lalu`;
   } else if (hours > 0) {
-    return `${hours} jam yang lalu`;
+    return `${hours} jam lalu`;
   } else if (minutes > 0) {
-    return `${minutes} menit yang lalu`;
+    return `${minutes} menit lalu`;
   } else {
     return "Baru saja";
   }

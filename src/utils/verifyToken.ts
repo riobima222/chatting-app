@@ -15,6 +15,6 @@ export const verifyToken = async (
         .json({ status: false, message: "Token tidak valid" });
     callback(decodeToken);
   } else {
-    res.status(401).json({ message: "tidak ada token" });
+    return res.status(401).json({ message: "tidak ada token" });
   }
 };

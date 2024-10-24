@@ -78,7 +78,7 @@ const Notification = ({ friendRequests, handleAccept, handleDecline }: any) => {
             {/* Ikon Tidak Ada Notifikasi */}
             <AiOutlineUserDelete className="w-16 h-16 text-gray-400" />
             <p className="font-semibold text-gray-700">
-              No friend requests found
+              There is no Notification !
             </p>
             <p className="text-gray-500 text-xs">
               You will see friend requests here.

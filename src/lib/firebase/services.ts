@@ -61,7 +61,7 @@ export const getRequestFriends = async (friendIds: string[]) => {
   try {
     const results: any[] = [];
     for (const id of friendIds) {
-      const snapshot = await getDoc(doc(collection(db, "users"), id)); // Ambil dokumen berdasarkan ID
+      const snapshot = await getDoc(doc(collection(db, "users"), id));
       results.push({ id: snapshot.id, ...snapshot.data() });
     }
     return results;

@@ -15,6 +15,7 @@ import NotificationIcon from "@/components/navbar/notificationIcon";
 import { NotificationAppearContext } from "@/context/notificationAppear";
 import { LoginSuccessContext } from "@/context/loginSuccess";
 import { retriveFriendsList } from "@/utils/homepage/retriveFriendsList";
+import { retriveMessages } from "@/utils/homepage/retriveMessages";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
@@ -22,10 +23,11 @@ const ChatPage: React.FC = () => {
   const [usersSearch, setUserSearch] = useState([]);
   const [searchEmail, setSearchEmail] = useState("");
   const [friendsList, setFriendsList] = useState<any>([]);
+  console.log("lihat friendsList: ", friendsList);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [friendRequest, setFriendRequest] = useState<any>([]);
-  const [friendId, setFriendId] = useState<string>("")
+  const [friendId, setFriendId] = useState<string>("");
   const currentUser = auth.currentUser as any;
 
   // GET CONTEXT
@@ -35,18 +37,21 @@ const ChatPage: React.FC = () => {
   const { notificationAppear, setNotificationAppear }: any = useContext(
     NotificationAppearContext
   );
-  const { loginSuccess, setLoginSuccess }: any =
-    useContext(LoginSuccessContext);
+  const { setLoginSuccess }: any = useContext(LoginSuccessContext);
 
   // HOOKS :
   useEffect(() => {
     if (currentUser) {
+      let unsubscribe1: () => void;
+      let unsubscribe2: () => void;
+      let unsubscribe3: () => void;
+
       try {
         const q = query(
           collection(db, "friends"),
           where("user2", "==", currentUser.uid)
         );
-        onSnapshot(q, (snapshot) => {
+        unsubscribe1 = onSnapshot(q, (snapshot) => {
           const results = snapshot.docs.map((doc) => ({
             id: doc.id,
             ...doc.data(),
@@ -87,15 +92,45 @@ const ChatPage: React.FC = () => {
       } catch (err) {
         console.log(err);
       }
-      
+
       // AMBIL FRIENDS LIST
       try {
-        retriveFriendsList(currentUser.uid, (data: any) => {
+        unsubscribe2 = retriveFriendsList(currentUser.uid, (data: any) => {
           setFriendsList(data);
-        })
-      } catch (err) {
+          if (data && data.length > 0) {
+            setFriendsList(data);
+            // Set up messages listener after friends list is updated
+            try {
+              unsubscribe3 = retriveMessages(
+                currentUser.uid,
+                data, // Use friendsData instead of friendsList state
+                (updateFriendsList: any) => {
+                  const sortedUsers = updateFriendsList.sort((a: any, b: any) => {
+                      const aMessagesLength = a.messages?.length || 0; // menggunakan optional chaining
+                      const bMessagesLength = b.messages?.length || 0;
 
+                      const aHasMultipleMessages = aMessagesLength > 0 ? 1 : 0;
+                      const bHasMultipleMessages = bMessagesLength > 0 ? 1 : 0;
+
+                      return bHasMultipleMessages - aHasMultipleMessages;
+                    }
+                  );
+                  setFriendsList(sortedUsers);
+                }
+              );
+            } catch (err) {
+              console.error("Error in retrieve messages:", err);
+            }
+          }
+        });
+      } catch (err) {
+        console.log(err);
       }
+      return () => {
+        if (unsubscribe1) unsubscribe1();
+        if (unsubscribe2) unsubscribe2();
+        if (unsubscribe3) unsubscribe3();
+      };
     }
   }, [currentUser]);
 
@@ -146,7 +181,7 @@ const ChatPage: React.FC = () => {
   };
 
   const handleSelectFriend = (friend: any) => {
-    setFriendId(friend.id)
+    setFriendId(friend.id);
     setSelectedFriend(friend.username);
     setIsSidebarOpen(false); // Close sidebar on mobile after selecting a friend
     setChatAppear(true);
@@ -247,21 +282,33 @@ const ChatPage: React.FC = () => {
             {friendsList.map((friend: any, key: number) => (
               <li
                 key={key}
-                className={`flex items-center gap-3 p-2 text-sm rounded-lg cursor-pointer hover:bg-red-200 transition-colors ${
+                className={`flex items-center justify-between p-2 text-sm rounded-lg cursor-pointer hover:bg-red-200 transition-colors ${
                   selectedFriend === friend.username
                     ? "bg-red-500 text-white"
                     : "bg-white text-gray-700"
                 }`}
                 onClick={() => handleSelectFriend(friend)}
               >
-                <Image
-                  src="/images/profile.png" // Ganti dengan avatar pengguna
-                  alt="Avatar"
-                  width={35}
-                  height={35}
-                  className="rounded-full h-[1.4em] w-[1.4em]"
-                />
-                <span>{friend.username}</span>
+                <div className="flex items-center gap-3">
+                  <div className="relative">
+                    <Image
+                      src="/images/profile.png" // Ganti dengan avatar pengguna
+                      alt="Avatar"
+                      width={35}
+                      height={35}
+                      className="rounded-full h-[1.4em] w-[1.4em]"
+                    />
+                    {/* Notifikasi pesan yang belum dibaca */}
+                    <span
+                      className={`${
+                        friend.messages?.length > 0 ? "" : "hidden"
+                      } absolute -top-2 -right-2 bg-red-500 text-white text-xs font-bold w-4 h-4 flex items-center justify-center rounded-full`}
+                    >
+                      {friend.messages?.length}
+                    </span>
+                  </div>
+                  <span>{friend.username}</span>
+                </div>
               </li>
             ))}
           </ul>
@@ -306,7 +353,7 @@ const ChatPage: React.FC = () => {
             </div>
           </div>
 
-          {chatAppear && <Chat userId={currentUser.uid} friendId={friendId}/>}
+          {chatAppear && <Chat userId={currentUser.uid} friendId={friendId} />}
           {searchAppear && <Search usersSearch={usersSearch} />}
           {notificationAppear && (
             <Notification
@@ -322,3 +369,6 @@ const ChatPage: React.FC = () => {
 };
 
 export default ChatPage;
+function unsubscribe1() {
+  throw new Error("Function not implemented.");
+}

@@ -1,11 +1,11 @@
+import { MessagesContext } from "@/context/messages";
 import { auth } from "@/lib/firebase/config";
 import { ambilChats } from "@/lib/firebase/services";
 import { calculateTimeDifference } from "@/utils/calculateDayBetween";
-import { useEffect, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 
 const Chat = (id: { userId: string; friendId: string }) => {
-  const [messages, setMessages] = useState<boolean | any>(false);
-  console.log("lihat messages: ", messages);
+  const {messages, setMessages}: any = useContext(MessagesContext);
   const [newMessage, setNewMessage] = useState("");
   const currentUser = auth.currentUser as any;
   const roomId = [id.userId, id.friendId].sort().join("_");
@@ -60,6 +60,7 @@ const Chat = (id: { userId: string; friendId: string }) => {
         message: {
           senderId: id.userId,
           text: newMessage,
+          isRead: false,
           createdAt: new Date(),
         },
         roomId,

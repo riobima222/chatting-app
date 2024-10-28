@@ -1,35 +1,41 @@
-export function calculateTimeDifference(dateString: string): string {
-  
-  // Mengubah string tanggal menjadi objek Date
-  const inputDate = new Date(dateString);
+// utils/calculateTimeDifference.ts
 
-  // Memeriksa apakah tanggal yang diberikan valid
-  if (isNaN(inputDate.getTime())) {
-    throw new Error("Tanggal tidak valid");
-  }
+export const calculateTimeDifference = (dateString: string | null | undefined): string => {
+    if (!dateString) {
+        return 'unknown';
+    }
 
-  // Mendapatkan tanggal saat ini
-  const currentDate = new Date();
+    try {
+        const date = new Date(dateString);
+        const now = new Date();
+        const diff = now.getTime() - date.getTime();
 
-  // Menghitung selisih dalam milidetik
-  const timeDifference = currentDate.getTime() - inputDate.getTime();
+        // Convert to seconds, minutes, hours, days
+        const seconds = Math.floor(diff / 1000);
+        const minutes = Math.floor(seconds / 60);
+        const hours = Math.floor(minutes / 60);
+        const days = Math.floor(hours / 24);
+        const weeks = Math.floor(days / 7);
+        const months = Math.floor(days / 30);
+        const years = Math.floor(days / 365);
 
-  // Menghitung selisih dalam detik
-  const secondsDifference = Math.floor(timeDifference / 1000);
-
-  // Menghitung hari, jam, menit, dan detik
-  const days = Math.floor(secondsDifference / (3600 * 24));
-  const hours = Math.floor((secondsDifference % (3600 * 24)) / 3600);
-  const minutes = Math.floor((secondsDifference % 3600) / 60);
-
-  // Menyusun hasil
-  if (days > 0) {
-    return `${days} hari lalu`;
-  } else if (hours > 0) {
-    return `${hours} jam lalu`;
-  } else if (minutes > 0) {
-    return `${minutes} menit lalu`;
-  } else {
-    return "Baru saja";
-  }
-}
+        if (seconds < 60) {
+            return 'just now';
+        } else if (minutes < 60) {
+            return `${minutes} ${minutes === 1 ? 'minute' : 'minutes'} ago`;
+        } else if (hours < 24) {
+            return `${hours} ${hours === 1 ? 'hour' : 'hours'} ago`;
+        } else if (days < 7) {
+            return `${days} ${days === 1 ? 'day' : 'days'} ago`;
+        } else if (weeks < 4) {
+            return `${weeks} ${weeks === 1 ? 'week' : 'weeks'} ago`;
+        } else if (months < 12) {
+            return `${months} ${months === 1 ? 'month' : 'months'} ago`;
+        } else {
+            return `${years} ${years === 1 ? 'year' : 'years'} ago`;
+        }
+    } catch (error) {
+        console.error('Error calculating time difference:', error);
+        return 'invalid date';
+    }
+};

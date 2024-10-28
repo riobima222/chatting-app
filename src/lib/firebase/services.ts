@@ -57,12 +57,30 @@ export const getFriendsShip = async (userId: string) => {
 };
 
 // GET REQUEST FRIENDS
-export const getRequestFriends = async (friendIds: string[]) => {
+export const getRequestFriends = async (
+  friendIds: string[],
+  userId: string
+) => {
   try {
     const results: any[] = [];
     for (const id of friendIds) {
+      const roomId = [userId, id].sort().join("_");
       const snapshot = await getDoc(doc(collection(db, "users"), id));
-      results.push({ id: snapshot.id, ...snapshot.data() });
+      const snapshot2 = await getDoc(doc(collection(db, "chats"), roomId));
+      const dataChat = snapshot2.data();
+
+      if(dataChat && dataChat.lastChat) {
+        results.push({
+          id: snapshot.id,
+          ...snapshot.data(),
+          lastChat: dataChat.lastChat
+        });
+      } else {
+        results.push({
+        id: snapshot.id,
+        ...snapshot.data(),
+      });
+      }
     }
     return results;
   } catch (err) {
@@ -92,7 +110,7 @@ export const cekChatRoom = async (
   if (!snapshot.exists()) {
     await setDoc(chatRoomRef, {
       users: [id.user1, id.user2],
-      createdAt: new Date(),
+      lastChat: new Date(),
     });
   }
 };
@@ -121,3 +139,32 @@ export const sendMessage = async (data: {
     return false;
   }
 };
+
+export const readMessage = async (roomId: string, messages: any[]) => {
+  try {
+    for (const mess of messages) {
+      const chatRef = doc(db, "chats", roomId);
+      const messageRef = doc(chatRef, "messages", mess.id);
+      await updateDoc(messageRef, {
+        isRead: true,
+      });
+    }
+    return true;
+  } catch (err) {
+    console.log("lihat error: ", err);
+    return false;
+  }
+};
+
+export const updateLastChat = async (roomId: string) => {
+  try {
+    const updateRef = doc(db, "chats", roomId);
+    await updateDoc(updateRef, {
+      lastChat: new Date(),
+    })
+    return true;
+  } catch(err) {
+    console.log("melihat error: ",err)
+    return false;
+  }
+}

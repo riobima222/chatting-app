@@ -16,6 +16,8 @@ import { NotificationAppearContext } from "@/context/notificationAppear";
 import { LoginSuccessContext } from "@/context/loginSuccess";
 import { retriveFriendsList } from "@/utils/homepage/retriveFriendsList";
 import { retriveMessages } from "@/utils/homepage/retriveMessages";
+import { TriggerContext } from "@/context/trigger";
+import { sortUsersByLastChat } from "@/utils/sortUserByLastChat";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
@@ -23,7 +25,6 @@ const ChatPage: React.FC = () => {
   const [usersSearch, setUserSearch] = useState([]);
   const [searchEmail, setSearchEmail] = useState("");
   const [friendsList, setFriendsList] = useState<any>([]);
-  console.log("lihat friendsList: ", friendsList);
   const [selectedFriend, setSelectedFriend] = useState("");
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [friendRequest, setFriendRequest] = useState<any>([]);
@@ -38,6 +39,7 @@ const ChatPage: React.FC = () => {
     NotificationAppearContext
   );
   const { setLoginSuccess }: any = useContext(LoginSuccessContext);
+  const {trigger}: any = useContext(TriggerContext);
 
   // HOOKS :
   useEffect(() => {
@@ -105,16 +107,8 @@ const ChatPage: React.FC = () => {
                 currentUser.uid,
                 data, // Use friendsData instead of friendsList state
                 (updateFriendsList: any) => {
-                  const sortedUsers = updateFriendsList.sort((a: any, b: any) => {
-                      const aMessagesLength = a.messages?.length || 0; // menggunakan optional chaining
-                      const bMessagesLength = b.messages?.length || 0;
-
-                      const aHasMultipleMessages = aMessagesLength > 0 ? 1 : 0;
-                      const bHasMultipleMessages = bMessagesLength > 0 ? 1 : 0;
-
-                      return bHasMultipleMessages - aHasMultipleMessages;
-                    }
-                  );
+                  const sortedUsers = sortUsersByLastChat(updateFriendsList);
+                  console.log("sorted users: ", sortedUsers);
                   setFriendsList(sortedUsers);
                 }
               );
@@ -132,7 +126,7 @@ const ChatPage: React.FC = () => {
         if (unsubscribe3) unsubscribe3();
       };
     }
-  }, [currentUser]);
+  }, [currentUser, trigger]);
 
   useEffect(() => {
     const unsubcribe = onAuthStateChanged(auth, (user) => {
@@ -180,13 +174,30 @@ const ChatPage: React.FC = () => {
     }
   };
 
-  const handleSelectFriend = (friend: any) => {
+  const handleSelectFriend = async (friend: any) => {
     setFriendId(friend.id);
     setSelectedFriend(friend.username);
     setIsSidebarOpen(false); // Close sidebar on mobile after selecting a friend
     setChatAppear(true);
     setNotificationAppear(false);
     setSearchAppear(false);
+    const roomId = [friend.id, currentUser.uid].sort().join("_");
+    const messages = friend.messages;
+    const res = await fetch("/api/readmessage", {
+      method: "POST",
+      body: JSON.stringify({ roomId, messages }),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: "Bearer " + currentUser.accessToken,
+      },
+      cache: "no-store",
+    });
+    const response = await res.json();
+    if (res.ok) {
+      console.log(response);
+    } else {
+      console.log(response);
+    }
   };
 
   const toggleSidebar = () => {
@@ -369,6 +380,3 @@ const ChatPage: React.FC = () => {
 };
 
 export default ChatPage;
-function unsubscribe1() {
-  throw new Error("Function not implemented.");
-}

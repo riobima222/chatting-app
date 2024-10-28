@@ -1,4 +1,5 @@
 import { MessagesContext } from "@/context/messages";
+import { TriggerContext } from "@/context/trigger";
 import { auth } from "@/lib/firebase/config";
 import { ambilChats } from "@/lib/firebase/services";
 import { calculateTimeDifference } from "@/utils/calculateDayBetween";
@@ -9,6 +10,9 @@ const Chat = (id: { userId: string; friendId: string }) => {
   const [newMessage, setNewMessage] = useState("");
   const currentUser = auth.currentUser as any;
   const roomId = [id.userId, id.friendId].sort().join("_");
+
+  // CONTEXT :
+    const { setTrigger }: any = useContext(TriggerContext);
 
   // REF
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -34,7 +38,7 @@ const Chat = (id: { userId: string; friendId: string }) => {
           roomId,
           (data: {
             id: string;
-            createdAt: Date | string;
+            lastChat: Date | string;
             senderId: string;
             text: string;
           }) => {
@@ -84,13 +88,28 @@ const Chat = (id: { userId: string; friendId: string }) => {
     }
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    console.log("masuk kesini !");
     if (inputRef.current) {
       inputRef.current.value = "";
     }
     handleSendMessage();
+    const res = await fetch("/api/chatroom/update", {
+      method: "POST",
+      body: JSON.stringify({roomId}),
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${currentUser.accessToken}`,
+      },
+      cache: "no-store"
+    })
+    const response = await res.json();
+    if(res.ok) {
+      setTrigger((prev: boolean) => !prev)
+      console.log(response);
+    } else {
+      console.log(response);
+    }
   };
 
   return (

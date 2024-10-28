@@ -6,8 +6,8 @@ export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
 ) {
-  const { friendIds } = req.body;
-  const response = await getRequestFriends(friendIds);
+  const { friendIds, currentUserId } = req.body;
+  const response = await getRequestFriends(friendIds, currentUserId);
   return apiResponse(
     res,
     response,

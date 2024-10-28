@@ -3,6 +3,7 @@ import LoginSuccessProvider from "@/context/loginSuccess";
 import MessagesProvider from "@/context/messages";
 import NotificationProvider from "@/context/notificationAppear";
 import SearchAppearProvider from "@/context/searchAppear";
+import TriggerProvider from "@/context/trigger";
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 
@@ -28,7 +29,9 @@ export default function App({ Component, pageProps }: AppProps) {
           <SearchAppearProvider>
             <NotificationProvider>
               <MessagesProvider>
-                <Component {...pageProps} />
+                <TriggerProvider>
+                  <Component {...pageProps} />
+                </TriggerProvider>
               </MessagesProvider>
             </NotificationProvider>
           </SearchAppearProvider>

@@ -1,4 +1,5 @@
 import ChatAppearProvider from "@/context/chatAppear";
+import HomeAppearProvider from "@/context/homeAppear";
 import LoginSuccessProvider from "@/context/loginSuccess";
 import MessagesProvider from "@/context/messages";
 import NotificationProvider from "@/context/notificationAppear";
@@ -30,7 +31,9 @@ export default function App({ Component, pageProps }: AppProps) {
             <NotificationProvider>
               <MessagesProvider>
                 <TriggerProvider>
+                    <HomeAppearProvider>
                   <Component {...pageProps} />
+                    </HomeAppearProvider>
                 </TriggerProvider>
               </MessagesProvider>
             </NotificationProvider>

@@ -18,6 +18,8 @@ import { retriveFriendsList } from "@/utils/homepage/retriveFriendsList";
 import { retriveMessages } from "@/utils/homepage/retriveMessages";
 import { TriggerContext } from "@/context/trigger";
 import { sortUsersByLastChat } from "@/utils/sortUserByLastChat";
+import HomeComponent from "@/components/homepage/home";
+import { HomeAppearContext } from "@/context/homeAppear";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
@@ -39,7 +41,8 @@ const ChatPage: React.FC = () => {
     NotificationAppearContext
   );
   const { setLoginSuccess }: any = useContext(LoginSuccessContext);
-  const {trigger}: any = useContext(TriggerContext);
+  const { trigger }: any = useContext(TriggerContext);
+  const { homeAppear, setHomeAppear }: any = useContext(HomeAppearContext);
 
   // HOOKS :
   useEffect(() => {
@@ -153,6 +156,7 @@ const ChatPage: React.FC = () => {
   const handleSearchFriend = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setChatAppear(false);
+    setHomeAppear(false);
     setNotificationAppear(false);
     setSearchAppear(true);
     const form = e.target as HTMLFormElement;
@@ -175,6 +179,7 @@ const ChatPage: React.FC = () => {
   };
 
   const handleSelectFriend = async (friend: any) => {
+    setHomeAppear(false);
     setFriendId(friend.id);
     setSelectedFriend(friend.username);
     setIsSidebarOpen(false); // Close sidebar on mobile after selecting a friend
@@ -223,7 +228,29 @@ const ChatPage: React.FC = () => {
       });
   };
 
-  const handleDeclineRequest = async () => {};
+  const handleDeclineRequest = async (id: string) => {
+    const res = await fetch(`/api/friends/${id}`, {
+      method: "DELETE",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${currentUser.accessToken}`
+      },
+      cache: "no-store"
+    })
+    const response = await res.json();
+    if(res?.ok) {
+      console.log(response);
+    } else {
+      console.log(response);
+    }
+  };
+  
+  const homeClick = () => {
+        setChatAppear(false);
+        setHomeAppear(true);
+        setNotificationAppear(false);
+        setSearchAppear(false);
+  }
 
   if (isAuthenticating) {
     return <Loading />;
@@ -237,20 +264,31 @@ const ChatPage: React.FC = () => {
     <div className="flex justify-center items-center bg-gray-100 min-h-screen">
       <div className="flex flex-col md:flex-row w-full max-w-5xl h-screen bg-white shadow-lg rounded-lg overflow-hidden">
         {/* Tombol Sidebar untuk Mobile */}
-        <div className="md:hidden bg-red-600 text-white p-4 flex justify-between items-center">
-          <h1 className="text-lg font-medium">
+        <div className="md:hidden bg-red-600 text-white px-4 py-1 flex justify-between items-center fixed w-full z-10">
+          <div
+            onClick={homeClick}
+            className="flex flex-col justify-center items-center gap-2 hover:cursor-pointer"
+          >
+            <Image
+              src={"/images/chatting-app-logo.png"}
+              alt="logo-image"
+              width={35}
+              height={35}
+              className="h-[2em] w-[2em]"
+            />
+            <span className="text-white">Erchat</span>
+          </div>
+          {/* <h1 className="text-lg font-medium">
             {selectedFriend ? `Chat with ${selectedFriend}` : "Select a Friend"}
-          </h1>
+          </h1> */}
           <div className="flex items-center space-x-4">
-            {/* Tambahan Tombol Logout di Navbar Mobile */}
+            <NotificationIcon notificationCount={friendRequest.length} />
             <button
               className="bg-white text-red-600 px-4 py-2 rounded-md hover:bg-red-50 transition-colors text-sm"
               onClick={handleLogout}
             >
               Logout
             </button>
-
-            {/* TOOGLE UNTUK MEMUNCULKAN SIDEBAR */}
             <button
               onClick={toggleSidebar}
               className="text-white text-2xl focus:outline-none"
@@ -264,13 +302,11 @@ const ChatPage: React.FC = () => {
         <div
           className={`${
             isSidebarOpen ? "block" : "hidden"
-          } md:block w-full md:w-1/4 bg-gray-200 p-3 border-b md:border-b-0 md:border-r border-gray-300`}
+          } md:block sm:mt-0 mt-16 w-full md:w-1/4 bg-gray-200 p-3 border-b md:border-b-0 md:border-r border-gray-300`}
         >
-          <h2 className="text-lg font-semibold mb-3 text-center md:text-left">
+          <h2 className="text-lg font-semibold mb-1 text-center md:text-left">
             Friends
           </h2>
-
-          {/* Pencarian Teman */}
           <div className="mb-3">
             <form onSubmit={handleSearchFriend}>
               <input
@@ -288,7 +324,6 @@ const ChatPage: React.FC = () => {
               </button>
             </form>
           </div>
-
           <ul className="space-y-2">
             {friendsList.map((friend: any, key: number) => (
               <li
@@ -303,13 +338,12 @@ const ChatPage: React.FC = () => {
                 <div className="flex items-center gap-3">
                   <div className="relative">
                     <Image
-                      src="/images/profile.png" // Ganti dengan avatar pengguna
+                      src="/images/profile.png"
                       alt="Avatar"
                       width={35}
                       height={35}
                       className="rounded-full h-[1.4em] w-[1.4em]"
                     />
-                    {/* Notifikasi pesan yang belum dibaca */}
                     <span
                       className={`${
                         friend.messages?.length > 0 ? "" : "hidden"
@@ -326,11 +360,14 @@ const ChatPage: React.FC = () => {
         </div>
 
         {/* Area Chat */}
-        <div className="flex flex-col w-full md:w-3/4 h-full">
+        <div className="flex flex-col w-full md:w-3/4 h-full pt-16 md:pt-0">
           {/* Header Chat */}
           <div className="hidden md:flex items-center justify-between bg-red-600 px-4 py-1">
             <div className="flex w-full items-center justify-between">
-              <div className="flex flex-col justify-center items-center">
+              <div
+                onClick={homeClick}
+                className="flex flex-col justify-center items-center hover:cursor-pointer"
+              >
                 <Image
                   src={"/images/chatting-app-logo.png"}
                   alt="logo-image"
@@ -338,13 +375,13 @@ const ChatPage: React.FC = () => {
                   height={35}
                   className="h-[2em] w-[2em]"
                 />
-                <span className="text-white">erchat</span>
+                <span className="text-white">Erchat</span>
               </div>
               <div className="flex items-center">
                 <NotificationIcon notificationCount={friendRequest.length} />
-                <div className="flex flex-col justufy-center ml-4 items-center">
+                <div className="flex flex-col justify-center ml-4 items-center">
                   <Image
-                    src="/images/profile.png" // Ganti dengan avatar pengguna
+                    src="/images/profile.png"
                     alt="Avatar"
                     width={35}
                     height={35}
@@ -352,8 +389,6 @@ const ChatPage: React.FC = () => {
                   />
                   <span className="text-white">{currentUser.displayName}</span>
                 </div>
-
-                {/* Tambahan Tombol Logout di Header Desktop */}
                 <button
                   className="ml-4 bg-white text-red-600 px-4 py-1 rounded-md hover:bg-red-50 font-bold transition-colors text-sm"
                   onClick={handleLogout}
@@ -364,6 +399,8 @@ const ChatPage: React.FC = () => {
             </div>
           </div>
 
+          {/* CHAT */}
+          {homeAppear && <HomeComponent />}
           {chatAppear && <Chat userId={currentUser.uid} friendId={friendId} />}
           {searchAppear && <Search usersSearch={usersSearch} />}
           {notificationAppear && (

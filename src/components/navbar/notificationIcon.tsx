@@ -1,4 +1,5 @@
 import { ChatAppearContext } from "@/context/chatAppear";
+import { HomeAppearContext } from "@/context/homeAppear";
 import { NotificationAppearContext } from "@/context/notificationAppear";
 import { SearchAppearContext } from "@/context/searchAppear";
 import { useContext } from "react";
@@ -15,11 +16,14 @@ const NotificationIcon: React.FC<NotificationIconProps> = ({
   const { setNotificationAppear }: any = useContext(NotificationAppearContext);
   const { setChatAppear }: any = useContext(ChatAppearContext);
   const { setSearchAppear }: any = useContext(SearchAppearContext);
+  const { setHomeAppear }: any = useContext(HomeAppearContext);
+
 
   const handleClick = () => {
     setNotificationAppear(true);
     setChatAppear(false);
     setSearchAppear(false);
+    setHomeAppear(false);
   };
 
   return (

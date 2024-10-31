@@ -2,6 +2,7 @@ import { db } from "@/lib/firebase/config";
 import {
   addDoc,
   collection,
+  deleteDoc,
   doc,
   getDoc,
   getDocs,
@@ -94,6 +95,16 @@ export const acceptFriend = async (friendId: string) => {
     await updateDoc(doc(db, "friends", friendId), {
       status: "accepted",
     });
+    return true;
+  } catch (err) {
+    return false;
+  }
+};
+
+// DECLINE FRIEND REQUEST
+export const declineFriend = async (id: string) => {
+  try {
+    await deleteDoc(doc(db, "friends", id));
     return true;
   } catch (err) {
     return false;

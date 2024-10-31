@@ -6,13 +6,13 @@ import { calculateTimeDifference } from "@/utils/calculateDayBetween";
 import { useContext, useEffect, useRef, useState } from "react";
 
 const Chat = (id: { userId: string; friendId: string }) => {
-  const {messages, setMessages}: any = useContext(MessagesContext);
+  const { messages, setMessages }: any = useContext(MessagesContext);
   const [newMessage, setNewMessage] = useState("");
   const currentUser = auth.currentUser as any;
   const roomId = [id.userId, id.friendId].sort().join("_");
 
   // CONTEXT :
-    const { setTrigger }: any = useContext(TriggerContext);
+  const { setTrigger }: any = useContext(TriggerContext);
 
   // REF
   const messagesEndRef = useRef<HTMLDivElement>(null);
@@ -96,16 +96,16 @@ const Chat = (id: { userId: string; friendId: string }) => {
     handleSendMessage();
     const res = await fetch("/api/chatroom/update", {
       method: "POST",
-      body: JSON.stringify({roomId}),
+      body: JSON.stringify({ roomId }),
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${currentUser.accessToken}`,
       },
-      cache: "no-store"
-    })
+      cache: "no-store",
+    });
     const response = await res.json();
-    if(res.ok) {
-      setTrigger((prev: boolean) => !prev)
+    if (res.ok) {
+      setTrigger((prev: boolean) => !prev);
       console.log(response);
     } else {
       console.log(response);
@@ -113,9 +113,9 @@ const Chat = (id: { userId: string; friendId: string }) => {
   };
 
   return (
-    <div className="flex flex-col w-full h-full overflow-y-auto">
+    <div className="flex flex-col h-full overflow-y-auto">
       {/* Area Pesan */}
-      <div className="flex-grow p-4 overflow-y-auto bg-gray-50">
+      <div className="p-4 overflow-y-auto bg-gray-50 flex-grow">
         {Array.isArray(messages) &&
           messages.map((message: any, index: number) => (
             <div
@@ -148,7 +148,7 @@ const Chat = (id: { userId: string; friendId: string }) => {
       </div>
 
       {/* Input Pesan */}
-      <div className="p-3 border-t border-gray-300 sticky bottom-0 bg-white">
+      <div className="p-3 border-t border-gray-300 bg-white">
         <form onSubmit={handleSubmit} className="flex items-center">
           <input
             type="text"

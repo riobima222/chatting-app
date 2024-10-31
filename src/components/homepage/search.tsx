@@ -6,7 +6,8 @@ import Swal from "sweetalert2";
 // ICONS
 import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { FaMale, FaFemale, FaCheckCircle, FaUserPlus } from "react-icons/fa";
-import { AiOutlineUserDelete, AiOutlineClockCircle } from "react-icons/ai";
+import { AiOutlineClockCircle } from "react-icons/ai";
+import { AiOutlineUser } from "react-icons/ai";
 
 interface Friend {
   id: string;
@@ -19,6 +20,7 @@ interface Friend {
 }
 
 const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
+  console.log("lihat userSearch: ", usersSearch);
   const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
   const [friendStatus, setFriendStatus] = useState<any>([]);
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
@@ -107,8 +109,8 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
     }
   };
 
-  const renderFriendStatus = (friend: Friend) => {
-    const status = friend?.status;
+  const renderFriendStatus = () => {
+    const status = friendStatus?.status;
 
     // Jika email hasil pencarian adalah email user yang sedang login, jangan tampilkan tombol
     if (usersSearch[0].email === currentUser?.email) {
@@ -120,7 +122,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
       return (
         <div className="flex items-center space-x-2 text-yellow-500">
           <AiOutlineClockCircle className="w-5 h-5" />
-          <span className="text-sm">Pending</span>
+          <span className="text-sm">Waiting</span>
         </div>
       );
     }
@@ -140,10 +142,9 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
       return (
         <button
           onClick={() => handleAddFriend(usersSearch[0])}
-          className="flex items-center bg-red-500 text-white px-4 py-2 rounded-lg hover:bg-red-600 transition-colors focus:outline-none focus:ring-2 focus:ring-red-400"
+          className="flex items-center space-x-2 bg-gradient-to-r from-blue-500 to-indigo-600 text-white px-4 py-2 rounded-full hover:from-blue-600 hover:to-indigo-700 transform hover:scale-105 transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 shadow-md"
         >
-          <FaUserPlus className="w-5 h-5 mr-2" />
-          <span>Add Friend</span>
+          <FaUserPlus className="w-4 h-4" />
         </button>
       );
     }
@@ -195,13 +196,13 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
               </div>
 
               {/* Tombol Add atau Status Pertemanan */}
-              <div>{renderFriendStatus(friendStatus)}</div>
+              <div>{renderFriendStatus()}</div>
             </li>
           ))
         ) : (
           <li className="h-full flex flex-col items-center justify-center space-y-3 text-gray-600 text-sm py-8">
             {/* Ikon User Not Found */}
-            <AiOutlineUserDelete className="w-16 h-16 text-gray-400" />
+            <AiOutlineUser className="w-16 h-16 text-gray-400" />
             <p className="font-semibold text-gray-700">No friends found</p>
             <p className="text-gray-500 text-xs">
               Try searching with a different email

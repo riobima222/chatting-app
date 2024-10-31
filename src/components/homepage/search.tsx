@@ -20,7 +20,6 @@ interface Friend {
 }
 
 const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
-  console.log("lihat userSearch: ", usersSearch);
   const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
   const [friendStatus, setFriendStatus] = useState<any>([]);
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);

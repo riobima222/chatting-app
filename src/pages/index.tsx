@@ -20,6 +20,7 @@ import { TriggerContext } from "@/context/trigger";
 import { sortUsersByLastChat } from "@/utils/sortUserByLastChat";
 import HomeComponent from "@/components/homepage/home";
 import { HomeAppearContext } from "@/context/homeAppear";
+import Swal from "sweetalert2";
 
 const ChatPage: React.FC = () => {
   const [user, setUser] = useState<User | null | boolean>(false);
@@ -111,7 +112,6 @@ const ChatPage: React.FC = () => {
                 data, // Use friendsData instead of friendsList state
                 (updateFriendsList: any) => {
                   const sortedUsers = sortUsersByLastChat(updateFriendsList);
-                  console.log("sorted users: ", sortedUsers);
                   setFriendsList(sortedUsers);
                 }
               );
@@ -198,9 +198,7 @@ const ChatPage: React.FC = () => {
       cache: "no-store",
     });
     const response = await res.json();
-    if (res.ok) {
-      console.log(response);
-    } else {
+    if (!res?.ok) {
       console.log(response);
     }
   };
@@ -229,28 +227,44 @@ const ChatPage: React.FC = () => {
   };
 
   const handleDeclineRequest = async (id: string) => {
-    const res = await fetch(`/api/friends/${id}`, {
-      method: "DELETE",
-      headers: {
-        "Content-Type": "application/json",
-        Authorization: `Bearer ${currentUser.accessToken}`
-      },
-      cache: "no-store"
-    })
-    const response = await res.json();
-    if(res?.ok) {
-      console.log(response);
-    } else {
-      console.log(response);
-    }
+    Swal.fire({
+      title: "Tolak Permintaan ?",
+      text: "Batalkan jika ingin chat dengan teman ini!",
+      icon: "warning",
+      showCancelButton: true,
+      confirmButtonColor: "#3085d6",
+      cancelButtonColor: "#d33",
+      confirmButtonText: "Yes, delete it!",
+    }).then(async (result) => {
+      if (result.isConfirmed) {
+        const res = await fetch(`/api/friends/${id}`, {
+          method: "DELETE",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${currentUser.accessToken}`,
+          },
+          cache: "no-store",
+        });
+        const response = await res.json();
+        if (res?.ok) {
+          Swal.fire({
+            title: "Deleted!",
+            text: "Your file has been deleted.",
+            icon: "success",
+          });
+        } else {
+          console.log(response);
+        }
+      }
+    });
   };
-  
+
   const homeClick = () => {
-        setChatAppear(false);
-        setHomeAppear(true);
-        setNotificationAppear(false);
-        setSearchAppear(false);
-  }
+    setChatAppear(false);
+    setHomeAppear(true);
+    setNotificationAppear(false);
+    setSearchAppear(false);
+  };
 
   if (isAuthenticating) {
     return <Loading />;
@@ -278,9 +292,6 @@ const ChatPage: React.FC = () => {
             />
             <span className="text-white">Erchat</span>
           </div>
-          {/* <h1 className="text-lg font-medium">
-            {selectedFriend ? `Chat with ${selectedFriend}` : "Select a Friend"}
-          </h1> */}
           <div className="flex items-center space-x-4">
             <NotificationIcon notificationCount={friendRequest.length} />
             <button

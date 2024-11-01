@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 export default async function handler( req: NextApiRequest,res: NextApiResponse) {
   if (req.method === "POST") {
     const { friendId } = req.body;
-    return verifyToken(req, res, async (decode) => {
+    return verifyToken(req, res, async () => {
         const response = await acceptFriend(friendId)
         return apiResponse(res, response, "success add friend");
     });

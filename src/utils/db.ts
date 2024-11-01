@@ -6,8 +6,6 @@ import {
   getDocs,
   addDoc,
   serverTimestamp,
-  getDoc,
-  doc,
 } from "firebase/firestore";
 
 export const getContacts = async (userId: string) => {

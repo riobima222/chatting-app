@@ -51,7 +51,7 @@ const Chat = (id: { userId: string; friendId: string }) => {
       }
     };
     checkChatRoom();
-  }, [id.userId, id.friendId]);
+  }, [id.userId, id.friendId, roomId]);
 
   useEffect(() => {
     scrollToBottom();

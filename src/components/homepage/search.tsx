@@ -8,6 +8,7 @@ import { collection, onSnapshot, query, where } from "firebase/firestore";
 import { FaMale, FaFemale, FaCheckCircle, FaUserPlus } from "react-icons/fa";
 import { AiOutlineClockCircle } from "react-icons/ai";
 import { AiOutlineUser } from "react-icons/ai";
+import Image from "next/image";
 
 interface Friend {
   id: string;
@@ -20,7 +21,7 @@ interface Friend {
 }
 
 const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
-  const [userNow, setUserNow] = useState<User | null | boolean | any>(false);
+  const [setUserNow] = useState<User | null | boolean | any>(false);
   const [friendStatus, setFriendStatus] = useState<any>([]);
   const [successAddFriend, setSuccessAddFriend] = useState<boolean>(false);
   const currentUser = auth.currentUser as any;
@@ -162,7 +163,7 @@ const Search = ({ usersSearch }: { usersSearch: Friend[] }) => {
               <div className="flex items-center space-x-3">
                 {/* Avatar Teman */}
                 <div className="flex-shrink-0">
-                  <img
+                  <Image
                     src={user.photoURL || "/images/profile.png"}
                     alt="Avatar"
                     className="w-10 h-10 rounded-full"

@@ -27,6 +27,7 @@ export const getFriend = async (email: string) => {
     }));
     return results;
   } catch (err) {
+    console.log("lihat error: ", err);
     return false;
   }
 };
@@ -37,6 +38,7 @@ export const addFriend = async (data: FriendInter) => {
     await addDoc(collection(db, "friends"), data);
     return true;
   } catch (err) {
+    console.log("lihat error: ", err)
     return false;
   }
 };
@@ -53,6 +55,7 @@ export const getFriendsShip = async (userId: string) => {
       return results;
     });
   } catch (err) {
+    console.log("lihat error: ", err);
     return false;
   }
 };
@@ -85,6 +88,7 @@ export const getRequestFriends = async (
     }
     return results;
   } catch (err) {
+    console.log("lihat error: ", err);
     return false;
   }
 };
@@ -97,6 +101,7 @@ export const acceptFriend = async (friendId: string) => {
     });
     return true;
   } catch (err) {
+    console.log("lihat error: ", err)
     return false;
   }
 };
@@ -107,6 +112,7 @@ export const declineFriend = async (id: string) => {
     await deleteDoc(doc(db, "friends", id));
     return true;
   } catch (err) {
+    console.log("lihat error: ", err);
     return false;
   }
 };
@@ -147,6 +153,7 @@ export const sendMessage = async (data: {
     await addDoc(messageRef, data.message);
     return true;
   } catch (err) {
+    console.log("lihat error: ", err);
     return false;
   }
 };

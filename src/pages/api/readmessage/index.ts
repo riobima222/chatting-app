@@ -9,7 +9,7 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const { roomId, messages } = req.body;
-    return verifyToken(req, res, async (decode) => {
+    return verifyToken(req, res, async () => {
       const response = await readMessage(roomId, messages);
       return apiResponse(res, response, "pesan berhasil di baca");
     });

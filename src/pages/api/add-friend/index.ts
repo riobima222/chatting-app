@@ -9,7 +9,7 @@ export default async function handler(
 ) {
   if (req.method === "POST") {
     const data = req.body;
-    return verifyToken(req, res, async (decode) => {
+    return verifyToken(req, res, async () => {
       const response = await addFriend(data);
       return apiResponse(res, response, "success add friend");
     });

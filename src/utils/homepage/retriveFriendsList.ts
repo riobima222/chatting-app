@@ -1,7 +1,7 @@
 import { db } from "@/lib/firebase/config"
 import { collection, onSnapshot, query, where } from "firebase/firestore"
 
-export const retriveFriendsList = (currentUserId: string, callback: Function ) => {
+export const retriveFriendsList = (currentUserId: string, callback: any ) => {
     const q1 = query(collection(db, "friends"), where("user1", "==", currentUserId), where("status", "==", "accepted"));
     const q2 = query(collection(db, "friends"), where("user2", "==", currentUserId), where("status", "==", "accepted"));
     

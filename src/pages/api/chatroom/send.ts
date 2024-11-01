@@ -1,8 +1,6 @@
-import { db } from "@/lib/firebase/config";
-import { cekChatRoom, sendMessage } from "@/lib/firebase/services";
+import { sendMessage } from "@/lib/firebase/services";
 import { apiResponse } from "@/utils/apiResponse";
 import { verifyToken } from "@/utils/verifyToken";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { NextApiResponse, NextApiRequest } from "next";
 
 export default async function handler (req: NextApiRequest,res: NextApiResponse) {

@@ -8,7 +8,7 @@ export const retriveMessages = (
 ): (() => void) => {
   const unsubscribes: Unsubscribe[] = [];
 
-  let updatedFriendsList = [...friendsList];
+  const updatedFriendsList = [...friendsList];
 
   friendsList.forEach((friend, index) => {
     const roomId = [userId, friend.id].sort().join("_");

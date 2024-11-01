@@ -1,6 +1,4 @@
-import { db } from "@/lib/firebase/config";
 import { cekChatRoom } from "@/lib/firebase/services";
-import { collection, onSnapshot, orderBy, query } from "firebase/firestore";
 import { NextApiResponse, NextApiRequest } from "next";
 
 export default async function handler (req: NextApiRequest,res: NextApiResponse) {

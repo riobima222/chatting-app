@@ -218,7 +218,7 @@ const ChatPage: React.FC = () => {
       cache: "no-store",
     })
       .then((res) => res.json())
-      .then((response) => {
+      .then(() => {
         setLoginSuccess(true);
         setTimeout(() => {
           setLoginSuccess(false);

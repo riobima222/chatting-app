@@ -6,7 +6,7 @@ import { NextApiRequest, NextApiResponse } from "next";
 export default async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === "POST") {
     const { roomId } = req.body;
-    return verifyToken(req, res, async (decode) => {
+    return verifyToken(req, res, async () => {
       const response = await updateLastChat(roomId);
       return apiResponse(res, response, "lastChat berhasil di perbaharui");
     });

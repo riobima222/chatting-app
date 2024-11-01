@@ -32,6 +32,7 @@ const ChatPage: React.FC = () => {
   const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const [friendRequest, setFriendRequest] = useState<any>([]);
   const [friendId, setFriendId] = useState<string>("");
+  const [messages, setMessages] = useState([]);
   const currentUser = auth.currentUser as any;
 
   // GET CONTEXT
@@ -188,6 +189,7 @@ const ChatPage: React.FC = () => {
     setSearchAppear(false);
     const roomId = [friend.id, currentUser.uid].sort().join("_");
     const messages = friend.messages;
+    setMessages(messages);
     const res = await fetch("/api/readmessage", {
       method: "POST",
       body: JSON.stringify({ roomId, messages }),
@@ -412,7 +414,7 @@ const ChatPage: React.FC = () => {
 
           {/* CHAT */}
           {homeAppear && <HomeComponent />}
-          {chatAppear && <Chat userId={currentUser.uid} friendId={friendId} />}
+          {chatAppear && <Chat userId={currentUser.uid} friendId={friendId} friendMessages={messages} />}
           {searchAppear && <Search usersSearch={usersSearch} />}
           {notificationAppear && (
             <Notification

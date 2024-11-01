@@ -5,7 +5,7 @@ import { ambilChats } from "@/lib/firebase/services";
 import { calculateTimeDifference } from "@/utils/calculateDayBetween";
 import { useContext, useEffect, useRef, useState } from "react";
 
-const Chat = (id: { userId: string; friendId: string }) => {
+const Chat = (id: { userId: string; friendId: string; friendMessages: any[] }) => {
   const { messages, setMessages }: any = useContext(MessagesContext);
   const [newMessage, setNewMessage] = useState("");
   const currentUser = auth.currentUser as any;
@@ -56,6 +56,28 @@ const Chat = (id: { userId: string; friendId: string }) => {
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
+
+  useEffect(() => {
+    const timer = setInterval(async () => {
+      if (id.friendMessages.length > 0) {
+        const res = await fetch("/api/readmessage", {
+          method: "POST",
+          body: JSON.stringify({ roomId , messages: id.friendMessages}),
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: "Bearer " + currentUser.accessToken,
+          },
+          cache: "no-store",
+        });
+        const response = await res.json();
+        if (!res?.ok) {
+          console.log(response);
+        }
+      }
+    }, 5000);
+
+    return () => clearInterval(timer);
+  }, []);
 
   // FUNCTION
   const handleSendMessage = async () => {

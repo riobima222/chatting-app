@@ -1,7 +1,9 @@
 # 🗨️ ERChat - Chatting App
 
-ERChat adalah aplikasi chatting modern berbasis web yang memungkinkan pengguna untuk berkomunikasi secara real-time dengan pengguna lain. Aplikasi ini dirancang agar mudah digunakan dan memberikan pengalaman chatting yang responsif.
+ERChat adalah aplikasi chatting berbasis web yang memungkinkan pengguna untuk berkomunikasi secara real-time dengan pengguna lain. Aplikasi ini dirancang agar mudah digunakan dan memberikan pengalaman chatting yang responsif.
 
+---
+Coba aplikasi disini : [Erchat-chattingApp](https://erchat-chatting.vercel.app)
 ---
 
 ## 🛠️ Teknologi Utama
@@ -47,31 +49,31 @@ Ikuti langkah-langkah berikut untuk menjalankan ERChat secara lokal.
    cd erchat-chatting-app
 Instal dependensi:
 
-bash
-Copy code
+```bash
 npm install
+```
 
 Konfigurasi Firebase:
 
-Masuk ke Firebase Console dan buat proyek baru.
-Aktifkan Authentication (gunakan metode Email & Password).
-Aktifkan Cloud Firestore untuk menyimpan pesan secara real-time.
-Salin konfigurasi Firebase (Settings -> General -> Firebase SDK snippet).
-Buat file .env.local di root folder proyek:
+- Masuk ke Firebase Console dan buat proyek baru.
+- Aktifkan Authentication (gunakan metode Email & Password).
+- Aktifkan Cloud Firestore untuk menyimpan pesan secara real-time.
+- Salin konfigurasi Firebase (Settings -> General -> Firebase SDK snippet).
+- Buat file .env.local di root folder proyek:
 
-env
-Copy code
+```bash
 NEXT_PUBLIC_FIREBASE_API_KEY=your-api-key
 NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN=your-auth-domain
 NEXT_PUBLIC_FIREBASE_PROJECT_ID=your-project-id
 NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET=your-storage-bucket
 NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID=your-messaging-sender-id
 NEXT_PUBLIC_FIREBASE_APP_ID=your-app-id
+```
 Jalankan aplikasi:
-
-bash
-Copy code
+```bash
 npm run dev
+```
+
 Akses di browser:
 Buka http://localhost:3000.
 
